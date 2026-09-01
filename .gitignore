@@ -1,0 +1,36 @@
+# Visual Studio specific folders (Required by rubric)
+.vs/
+bin/
+obj/
+
+# MS Access Databases (Required by rubric)
+*.mdb
+*.accdb
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Ll]og/
+
+# SQL Server files (Optional but good practice)
+*.mdf
+*.ldf
+*.ndf
+
+# OS generated files
+.DS_Store
+Thumbs.db
