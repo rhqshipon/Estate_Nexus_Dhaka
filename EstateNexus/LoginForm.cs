@@ -13,12 +13,12 @@ namespace EstateNexus
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            string email = txtEmail.Text.Trim();
+            string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Please enter both email and password.");
+                MessageBox.Show("Please enter both username and password.");
                 return;
             }
 
@@ -26,27 +26,50 @@ namespace EstateNexus
             {
                 using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
                 {
-                    string query = "SELECT UserId, FullName, Role, AccountStatus FROM Users WHERE Email = @Email AND Password = @Password";
+                    string query = "SELECT UserId, FullName, Username, Role, Password, AccountStatus FROM Users WHERE Username = @Username";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
-                        cmd.Parameters.AddWithValue("@Email", email);
-                        cmd.Parameters.AddWithValue("@Password", password);
+                        cmd.Parameters.AddWithValue("@Username", username);
 
                         con.Open();
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
                             {
-                                string status = reader["AccountStatus"].ToString();
+                                string storedPassword = reader["Password"]?.ToString() ?? "";
+                                
+                                // Verify password using SHA-256 (with backward-compatible check)
+                                if (!PasswordHelper.VerifyPassword(password, storedPassword))
+                                {
+                                    MessageBox.Show("Invalid username or password.");
+                                    return;
+                                }
+
+                                string status = reader["AccountStatus"]?.ToString();
                                 if (status == "Inactive")
                                 {
                                     MessageBox.Show("Your account is inactive. Please contact admin.");
                                     return;
                                 }
 
-                                Session.UserId = Convert.ToInt32(reader["UserId"]);
+                                int userId = Convert.ToInt32(reader["UserId"]);
+                                Session.UserId = userId;
                                 Session.FullName = reader["FullName"].ToString();
+                                Session.Username = reader["Username"]?.ToString() ?? username;
                                 Session.Role = reader["Role"].ToString();
+
+                                // If the stored password was legacy plain text, transparently upgrade it to SHA-256 hash
+                                if (!PasswordHelper.IsHashed(storedPassword))
+                                {
+                                    reader.Close();
+                                    string upgradeQuery = "UPDATE Users SET Password = @NewHash WHERE UserId = @UserId";
+                                    using (SqlCommand upgradeCmd = new SqlCommand(upgradeQuery, con))
+                                    {
+                                        upgradeCmd.Parameters.AddWithValue("@NewHash", PasswordHelper.HashPassword(password));
+                                        upgradeCmd.Parameters.AddWithValue("@UserId", userId);
+                                        upgradeCmd.ExecuteNonQuery();
+                                    }
+                                }
 
                                 MessageBox.Show("Login Successful! Welcome " + Session.FullName);
                                 
@@ -68,7 +91,7 @@ namespace EstateNexus
                             }
                             else
                             {
-                                MessageBox.Show("Invalid email or password.");
+                                MessageBox.Show("Invalid username or password.");
                             }
                         }
                     }
@@ -86,10 +109,10 @@ namespace EstateNexus
             regForm.Show();
             this.Hide();
         }
+
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             Environment.Exit(0);
         }
     }
 }
-

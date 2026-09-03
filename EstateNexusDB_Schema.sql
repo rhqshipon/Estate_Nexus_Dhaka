@@ -11,9 +11,10 @@ GO
 CREATE TABLE Users (
     UserId INT IDENTITY(1,1) PRIMARY KEY,
     FullName NVARCHAR(100) NOT NULL,
+    Username NVARCHAR(50) NOT NULL UNIQUE,
     Email NVARCHAR(100) NOT NULL UNIQUE,
     Phone NVARCHAR(20),
-    Password NVARCHAR(100) NOT NULL,
+    Password NVARCHAR(256) NOT NULL,
     Address NVARCHAR(255),
     Role NVARCHAR(20) NOT NULL, -- SuperAdmin, Admin, Customer
     AccountStatus NVARCHAR(20) DEFAULT 'Active',
@@ -93,8 +94,9 @@ CREATE TABLE ReservationCartItems (
 );
 
 -- 3. Insert Default Data (for Viva demonstration)
-INSERT INTO Users (FullName, Email, Password, Role) 
-VALUES ('Super Admin', 'admin@estatenexus.com', 'admin123', 'SuperAdmin');
+-- Password below is SHA-256 hash of 'admin123'
+INSERT INTO Users (FullName, Username, Email, Password, Role) 
+VALUES ('Super Admin', 'superadmin', 'admin@estatenexus.com', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'SuperAdmin');
 
 INSERT INTO PropertyCategories (CategoryName) 
 VALUES ('Apartment'), ('House'), ('Commercial'), ('Land');
