@@ -16,8 +16,8 @@ partial class LoginForm
     private void InitializeComponent()
     {
         this.lblTitle = new System.Windows.Forms.Label();
-        this.lblEmail = new System.Windows.Forms.Label();
-        this.txtEmail = new System.Windows.Forms.TextBox();
+        this.lblUsername = new System.Windows.Forms.Label();
+        this.txtUsername = new System.Windows.Forms.TextBox();
         this.lblPassword = new System.Windows.Forms.Label();
         this.txtPassword = new System.Windows.Forms.TextBox();
         this.btnLogin = new System.Windows.Forms.Button();
@@ -32,24 +32,24 @@ partial class LoginForm
         this.lblTitle.Size = new System.Drawing.Size(155, 32);
         this.lblTitle.Text = "EstateNexus";
 
-        // lblEmail
-        this.lblEmail.AutoSize = true;
-        this.lblEmail.Font = new System.Drawing.Font("Segoe UI", 10F);
-        this.lblEmail.Location = new System.Drawing.Point(90, 105);
-        this.lblEmail.Name = "lblEmail";
-        this.lblEmail.Size = new System.Drawing.Size(44, 19);
-        this.lblEmail.Text = "Email:";
+        // lblUsername
+        this.lblUsername.AutoSize = true;
+        this.lblUsername.Font = new System.Drawing.Font("Segoe UI", 10F);
+        this.lblUsername.Location = new System.Drawing.Point(80, 105);
+        this.lblUsername.Name = "lblUsername";
+        this.lblUsername.Size = new System.Drawing.Size(74, 19);
+        this.lblUsername.Text = "Username:";
 
-        // txtEmail
-        this.txtEmail.Font = new System.Drawing.Font("Segoe UI", 10F);
-        this.txtEmail.Location = new System.Drawing.Point(170, 102);
-        this.txtEmail.Name = "txtEmail";
-        this.txtEmail.Size = new System.Drawing.Size(230, 25);
+        // txtUsername
+        this.txtUsername.Font = new System.Drawing.Font("Segoe UI", 10F);
+        this.txtUsername.Location = new System.Drawing.Point(170, 102);
+        this.txtUsername.Name = "txtUsername";
+        this.txtUsername.Size = new System.Drawing.Size(230, 25);
 
         // lblPassword
         this.lblPassword.AutoSize = true;
         this.lblPassword.Font = new System.Drawing.Font("Segoe UI", 10F);
-        this.lblPassword.Location = new System.Drawing.Point(90, 155);
+        this.lblPassword.Location = new System.Drawing.Point(80, 155);
         this.lblPassword.Name = "lblPassword";
         this.lblPassword.Size = new System.Drawing.Size(70, 19);
         this.lblPassword.Text = "Password:";
@@ -85,8 +85,8 @@ partial class LoginForm
         this.Controls.Add(this.btnLogin);
         this.Controls.Add(this.txtPassword);
         this.Controls.Add(this.lblPassword);
-        this.Controls.Add(this.txtEmail);
-        this.Controls.Add(this.lblEmail);
+        this.Controls.Add(this.txtUsername);
+        this.Controls.Add(this.lblUsername);
         this.Controls.Add(this.lblTitle);
         this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
         this.MaximizeBox = false;
@@ -98,8 +98,8 @@ partial class LoginForm
     }
 
     private System.Windows.Forms.Label lblTitle;
-    private System.Windows.Forms.Label lblEmail;
-    private System.Windows.Forms.TextBox txtEmail;
+    private System.Windows.Forms.Label lblUsername;
+    private System.Windows.Forms.TextBox txtUsername;
     private System.Windows.Forms.Label lblPassword;
     private System.Windows.Forms.TextBox txtPassword;
     private System.Windows.Forms.Button btnLogin;

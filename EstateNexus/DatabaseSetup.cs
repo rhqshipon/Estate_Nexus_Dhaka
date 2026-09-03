@@ -72,6 +72,7 @@ namespace EstateNexus
                 CREATE TABLE Users (
                     UserId INT IDENTITY(1,1) PRIMARY KEY,
                     FullName NVARCHAR(100) NOT NULL,
+                    Username NVARCHAR(50) NOT NULL UNIQUE,
                     Email NVARCHAR(100) NOT NULL UNIQUE,
                     Phone NVARCHAR(20),
                     Password NVARCHAR(100) NOT NULL,
@@ -173,6 +174,26 @@ namespace EstateNexus
                 {
                     connection.Open();
 
+                    // Ensure Username column exists on existing Users table
+                    string ensureUserColQuery = @"
+                        IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Users')
+                        BEGIN
+                            IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Username')
+                            BEGIN
+                                ALTER TABLE Users ADD Username NVARCHAR(50) NULL;
+                                EXEC('UPDATE Users SET Username = CASE 
+                                        WHEN Email = ''admin@estatenexus.com'' THEN ''superadmin''
+                                        WHEN Email = ''seller@estatenexus.com'' THEN ''seller''
+                                        WHEN Email = ''customer@estatenexus.com'' THEN ''customer''
+                                        ELSE SUBSTRING(Email, 1, CASE WHEN CHARINDEX(''@'', Email) > 1 THEN CHARINDEX(''@'', Email) - 1 ELSE 10 END)
+                                     END WHERE Username IS NULL');
+                            END
+                        END";
+                    using (SqlCommand userColCmd = new SqlCommand(ensureUserColQuery, connection))
+                    {
+                        userColCmd.ExecuteNonQuery();
+                    }
+
                     // Ensure PaymentMethod column exists on existing databases
                     string ensureColsQuery = @"
                         IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Orders')
@@ -195,10 +216,10 @@ namespace EstateNexus
                         if (count == 0)
                         {
                             string insertUsers = @"
-                                INSERT INTO Users (FullName, Email, Password, Role, Phone, Address) VALUES 
-                                ('Super Admin', 'admin@estatenexus.com', 'admin123', 'SuperAdmin', '01700000000', 'EstateNexus HQ'),
-                                ('Property Seller', 'seller@estatenexus.com', 'seller123', 'Admin', '01711111111', 'Gulshan, Dhaka'),
-                                ('John Customer', 'customer@estatenexus.com', 'customer123', 'Customer', '01722222222', 'Banani, Dhaka');
+                                INSERT INTO Users (FullName, Username, Email, Password, Role, Phone, Address) VALUES 
+                                ('Super Admin', 'superadmin', 'admin@estatenexus.com', 'admin123', 'SuperAdmin', '01700000000', 'EstateNexus HQ'),
+                                ('Property Seller', 'seller', 'seller@estatenexus.com', 'seller123', 'Admin', '01711111111', 'Gulshan, Dhaka'),
+                                ('John Customer', 'customer', 'customer@estatenexus.com', 'customer123', 'Customer', '01722222222', 'Banani, Dhaka');
                             ";
                             using (SqlCommand insertCmd = new SqlCommand(insertUsers, connection))
                             {

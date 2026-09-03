@@ -26,7 +26,7 @@ namespace EstateNexus
             {
                 using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
                 {
-                    SqlDataAdapter da = new SqlDataAdapter("SELECT UserId, FullName, Email, Phone, Role, AccountStatus, CreatedAt FROM Users", con);
+                    SqlDataAdapter da = new SqlDataAdapter("SELECT UserId, FullName, Username, Email, Phone, Role, AccountStatus, CreatedAt FROM Users", con);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
                     dgvUsers.DataSource = dt;
@@ -106,6 +106,13 @@ namespace EstateNexus
             }
 
             int userId = Convert.ToInt32(dgvUsers.SelectedRows[0].Cells["UserId"].Value);
+
+            if (userId == Session.UserId)
+            {
+                MessageBox.Show("You cannot deactivate or change the status of your own Super Admin account!", "Action Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             string currentStatus = dgvUsers.SelectedRows[0].Cells["AccountStatus"].Value?.ToString() ?? "Active";
             string newStatus = currentStatus == "Active" ? "Inactive" : "Active";
 

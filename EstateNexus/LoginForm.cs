@@ -13,12 +13,12 @@ namespace EstateNexus
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            string email = txtEmail.Text.Trim();
+            string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Please enter both email and password.");
+                MessageBox.Show("Please enter both username and password.");
                 return;
             }
 
@@ -26,10 +26,10 @@ namespace EstateNexus
             {
                 using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
                 {
-                    string query = "SELECT UserId, FullName, Role, AccountStatus FROM Users WHERE Email = @Email AND Password = @Password";
+                    string query = "SELECT UserId, FullName, Username, Role, AccountStatus FROM Users WHERE Username = @Username AND Password = @Password";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
-                        cmd.Parameters.AddWithValue("@Email", email);
+                        cmd.Parameters.AddWithValue("@Username", username);
                         cmd.Parameters.AddWithValue("@Password", password);
 
                         con.Open();
@@ -46,6 +46,7 @@ namespace EstateNexus
 
                                 Session.UserId = Convert.ToInt32(reader["UserId"]);
                                 Session.FullName = reader["FullName"].ToString();
+                                Session.Username = reader["Username"]?.ToString() ?? username;
                                 Session.Role = reader["Role"].ToString();
 
                                 MessageBox.Show("Login Successful! Welcome " + Session.FullName);
@@ -68,7 +69,7 @@ namespace EstateNexus
                             }
                             else
                             {
-                                MessageBox.Show("Invalid email or password.");
+                                MessageBox.Show("Invalid username or password.");
                             }
                         }
                     }
@@ -86,10 +87,10 @@ namespace EstateNexus
             regForm.Show();
             this.Hide();
         }
+
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             Environment.Exit(0);
         }
     }
 }
-
