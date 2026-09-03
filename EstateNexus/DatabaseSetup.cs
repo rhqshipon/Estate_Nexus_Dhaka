@@ -75,7 +75,7 @@ namespace EstateNexus
                     Username NVARCHAR(50) NOT NULL UNIQUE,
                     Email NVARCHAR(100) NOT NULL UNIQUE,
                     Phone NVARCHAR(20),
-                    Password NVARCHAR(100) NOT NULL,
+                    Password NVARCHAR(256) NOT NULL,
                     Address NVARCHAR(255),
                     Role NVARCHAR(20) NOT NULL, -- SuperAdmin, Admin, Customer
                     AccountStatus NVARCHAR(20) DEFAULT 'Active',
@@ -194,6 +194,55 @@ namespace EstateNexus
                         userColCmd.ExecuteNonQuery();
                     }
 
+                    // Ensure Password column width on existing Users table is NVARCHAR(256)
+                    string ensurePasswordColQuery = @"
+                        IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Users')
+                        BEGIN
+                            IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Password' AND max_length < 512)
+                            BEGIN
+                                ALTER TABLE Users ALTER COLUMN Password NVARCHAR(256) NOT NULL;
+                            END
+                        END";
+                    using (SqlCommand passColCmd = new SqlCommand(ensurePasswordColQuery, connection))
+                    {
+                        passColCmd.ExecuteNonQuery();
+                    }
+
+                    // Migrate legacy plain-text passwords to SHA-256 hashes
+                    try
+                    {
+                        var unhashedUsers = new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<int, string>>();
+                        string checkUnhashedQuery = "SELECT UserId, Password FROM Users WHERE LEN(Password) < 64";
+                        using (SqlCommand checkUnhashedCmd = new SqlCommand(checkUnhashedQuery, connection))
+                        using (SqlDataReader rdr = checkUnhashedCmd.ExecuteReader())
+                        {
+                            while (rdr.Read())
+                            {
+                                int uId = Convert.ToInt32(rdr["UserId"]);
+                                string plain = rdr["Password"]?.ToString() ?? "";
+                                if (!string.IsNullOrEmpty(plain))
+                                {
+                                    unhashedUsers.Add(new System.Collections.Generic.KeyValuePair<int, string>(uId, PasswordHelper.HashPassword(plain)));
+                                }
+                            }
+                        }
+
+                        foreach (var userEntry in unhashedUsers)
+                        {
+                            string updateHashQuery = "UPDATE Users SET Password = @HashedPassword WHERE UserId = @UserId";
+                            using (SqlCommand updateHashCmd = new SqlCommand(updateHashQuery, connection))
+                            {
+                                updateHashCmd.Parameters.AddWithValue("@HashedPassword", userEntry.Value);
+                                updateHashCmd.Parameters.AddWithValue("@UserId", userEntry.Key);
+                                updateHashCmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore if migration cannot run at this moment
+                    }
+
                     // Ensure PaymentMethod column exists on existing databases
                     string ensureColsQuery = @"
                         IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Orders')
@@ -215,14 +264,21 @@ namespace EstateNexus
                         int count = (int)cmd.ExecuteScalar();
                         if (count == 0)
                         {
+                            string adminHash = PasswordHelper.HashPassword("admin123");
+                            string sellerHash = PasswordHelper.HashPassword("seller123");
+                            string customerHash = PasswordHelper.HashPassword("customer123");
+
                             string insertUsers = @"
                                 INSERT INTO Users (FullName, Username, Email, Password, Role, Phone, Address) VALUES 
-                                ('Super Admin', 'superadmin', 'admin@estatenexus.com', 'admin123', 'SuperAdmin', '01700000000', 'EstateNexus HQ'),
-                                ('Property Seller', 'seller', 'seller@estatenexus.com', 'seller123', 'Admin', '01711111111', 'Gulshan, Dhaka'),
-                                ('John Customer', 'customer', 'customer@estatenexus.com', 'customer123', 'Customer', '01722222222', 'Banani, Dhaka');
+                                ('Super Admin', 'superadmin', 'admin@estatenexus.com', @AdminPassword, 'SuperAdmin', '01700000000', 'EstateNexus HQ'),
+                                ('Property Seller', 'seller', 'seller@estatenexus.com', @SellerPassword, 'Admin', '01711111111', 'Gulshan, Dhaka'),
+                                ('John Customer', 'customer', 'customer@estatenexus.com', @CustomerPassword, 'Customer', '01722222222', 'Banani, Dhaka');
                             ";
                             using (SqlCommand insertCmd = new SqlCommand(insertUsers, connection))
                             {
+                                insertCmd.Parameters.AddWithValue("@AdminPassword", adminHash);
+                                insertCmd.Parameters.AddWithValue("@SellerPassword", sellerHash);
+                                insertCmd.Parameters.AddWithValue("@CustomerPassword", customerHash);
                                 insertCmd.ExecuteNonQuery();
                             }
                         }

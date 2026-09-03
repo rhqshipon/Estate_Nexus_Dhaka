@@ -86,7 +86,8 @@ namespace EstateNexus
                         }
                     }
 
-                    // 6. Insert new user with Username
+                    // 6. Insert new user with Username and Hashed Password
+                    string hashedPassword = PasswordHelper.HashPassword(password);
                     string insertQuery = "INSERT INTO Users (FullName, Username, Email, Phone, Password, Role) VALUES (@Name, @Username, @Email, @Phone, @Password, @Role)";
                     using (SqlCommand insertCmd = new SqlCommand(insertQuery, con))
                     {
@@ -94,7 +95,7 @@ namespace EstateNexus
                         insertCmd.Parameters.AddWithValue("@Username", username);
                         insertCmd.Parameters.AddWithValue("@Email", email);
                         insertCmd.Parameters.AddWithValue("@Phone", phone);
-                        insertCmd.Parameters.AddWithValue("@Password", password);
+                        insertCmd.Parameters.AddWithValue("@Password", hashedPassword);
                         insertCmd.Parameters.AddWithValue("@Role", role);
 
                         insertCmd.ExecuteNonQuery();
