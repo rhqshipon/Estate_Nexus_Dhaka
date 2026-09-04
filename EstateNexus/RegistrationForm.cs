@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.Data.SqlClient;
 using System.Windows.Forms;
+using EstateNexus.Data;
+using EstateNexus.Models.Entities;
 
 namespace EstateNexus
 {
@@ -54,58 +56,43 @@ namespace EstateNexus
 
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                using (var context = new EstateNexusDbContext())
                 {
-                    con.Open();
-
-                    // 4. Check if Username already exists
-                    string checkUsernameQuery = "SELECT COUNT(*) FROM Users WHERE Username = @Username";
-                    using (SqlCommand checkUserCmd = new SqlCommand(checkUsernameQuery, con))
+                    // 4. Check if Email already exists
+                    if (context.Users.Any(u => u.Email == email))
                     {
-                        checkUserCmd.Parameters.AddWithValue("@Username", username);
-                        int userCount = (int)checkUserCmd.ExecuteScalar();
-                        if (userCount > 0)
-                        {
-                            MessageBox.Show("Username is already taken. Please choose a different username.", "Duplicate Username", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            txtUsername.Focus();
-                            return;
-                        }
+                        MessageBox.Show("Email is already registered. Please login or use a different email.", "Duplicate Email", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        txtEmail.Focus();
+                        return;
                     }
 
-                    // 5. Check if Email already exists
-                    string checkEmailQuery = "SELECT COUNT(*) FROM Users WHERE Email = @Email";
-                    using (SqlCommand checkEmailCmd = new SqlCommand(checkEmailQuery, con))
-                    {
-                        checkEmailCmd.Parameters.AddWithValue("@Email", email);
-                        int emailCount = (int)checkEmailCmd.ExecuteScalar();
-                        if (emailCount > 0)
-                        {
-                            MessageBox.Show("Email is already registered. Please login or use a different email.", "Duplicate Email", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            txtEmail.Focus();
-                            return;
-                        }
-                    }
+                    // 5. Insert new user with RoleId and Hashed Password
+                    var roleObj = context.Roles.FirstOrDefault(r => r.RoleName == role)
+                                  ?? context.Roles.FirstOrDefault(r => r.RoleName == "Customer");
 
-                    // 6. Insert new user with Username and Hashed Password
                     string hashedPassword = PasswordHelper.HashPassword(password);
-                    string insertQuery = "INSERT INTO Users (FullName, Username, Email, Phone, Password, Role) VALUES (@Name, @Username, @Email, @Phone, @Password, @Role)";
-                    using (SqlCommand insertCmd = new SqlCommand(insertQuery, con))
+                    var newUser = new User
                     {
-                        insertCmd.Parameters.AddWithValue("@Name", name);
-                        insertCmd.Parameters.AddWithValue("@Username", username);
-                        insertCmd.Parameters.AddWithValue("@Email", email);
-                        insertCmd.Parameters.AddWithValue("@Phone", phone);
-                        insertCmd.Parameters.AddWithValue("@Password", hashedPassword);
-                        insertCmd.Parameters.AddWithValue("@Role", role);
+                        RoleId = roleObj.RoleId,
+                        FullName = name,
+                        Email = email,
+                        Phone = phone,
+                        PasswordHash = hashedPassword,
+                        Address = "",
+                        ProfileImagePath = null,
+                        AccountStatus = "Active",
+                        IsActive = true,
+                        CreatedDate = DateTime.Now
+                    };
 
-                        insertCmd.ExecuteNonQuery();
-                        
-                        MessageBox.Show("Registration Successful! Please login with your username.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        
-                        LoginForm loginForm = new LoginForm();
-                        loginForm.Show();
-                        this.Hide();
-                    }
+                    context.Users.Add(newUser);
+                    context.SaveChanges();
+
+                    MessageBox.Show("Registration Successful! Please login with your email address.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    LoginForm loginForm = new LoginForm();
+                    loginForm.Show();
+                    this.Hide();
                 }
             }
             catch (Exception ex)

@@ -1,6 +1,9 @@
 using System;
-using Microsoft.Data.SqlClient;
+using System.Linq;
 using System.Windows.Forms;
+using Microsoft.EntityFrameworkCore;
+using EstateNexus.Data;
+using EstateNexus.Models.Entities;
 
 namespace EstateNexus
 {
@@ -13,87 +16,71 @@ namespace EstateNexus
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            string username = txtUsername.Text.Trim();
+            string input = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Please enter both username and password.");
+                MessageBox.Show("Please enter both email/username and password.");
                 return;
             }
 
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                using (var context = new EstateNexusDbContext())
                 {
-                    string query = "SELECT UserId, FullName, Username, Role, Password, AccountStatus FROM Users WHERE Username = @Username";
-                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    string targetEmail = input.Contains("@") ? input : input + "@estatenexus.com";
+                    var user = context.Users
+                        .Include(u => u.Role)
+                        .FirstOrDefault(u => u.Email == input || u.Email == targetEmail);
+
+                    if (user != null)
                     {
-                        cmd.Parameters.AddWithValue("@Username", username);
-
-                        con.Open();
-                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        if (!PasswordHelper.VerifyPassword(password, user.PasswordHash))
                         {
-                            if (reader.Read())
-                            {
-                                string storedPassword = reader["Password"]?.ToString() ?? "";
-                                
-                                // Verify password using SHA-256 (with backward-compatible check)
-                                if (!PasswordHelper.VerifyPassword(password, storedPassword))
-                                {
-                                    MessageBox.Show("Invalid username or password.");
-                                    return;
-                                }
-
-                                string status = reader["AccountStatus"]?.ToString();
-                                if (status == "Inactive")
-                                {
-                                    MessageBox.Show("Your account is inactive. Please contact admin.");
-                                    return;
-                                }
-
-                                int userId = Convert.ToInt32(reader["UserId"]);
-                                Session.UserId = userId;
-                                Session.FullName = reader["FullName"].ToString();
-                                Session.Username = reader["Username"]?.ToString() ?? username;
-                                Session.Role = reader["Role"].ToString();
-
-                                // If the stored password was legacy plain text, transparently upgrade it to SHA-256 hash
-                                if (!PasswordHelper.IsHashed(storedPassword))
-                                {
-                                    reader.Close();
-                                    string upgradeQuery = "UPDATE Users SET Password = @NewHash WHERE UserId = @UserId";
-                                    using (SqlCommand upgradeCmd = new SqlCommand(upgradeQuery, con))
-                                    {
-                                        upgradeCmd.Parameters.AddWithValue("@NewHash", PasswordHelper.HashPassword(password));
-                                        upgradeCmd.Parameters.AddWithValue("@UserId", userId);
-                                        upgradeCmd.ExecuteNonQuery();
-                                    }
-                                }
-
-                                MessageBox.Show("Login Successful! Welcome " + Session.FullName);
-                                
-                                this.Hide();
-                                
-                                // Open appropriate dashboard based on role
-                                if (Session.Role == "SuperAdmin")
-                                {
-                                    new SuperAdminDashboard().Show();
-                                }
-                                else if (Session.Role == "Admin")
-                                {
-                                    new AdminDashboard().Show();
-                                }
-                                else
-                                {
-                                    new CustomerDashboard().Show();
-                                }
-                            }
-                            else
-                            {
-                                MessageBox.Show("Invalid username or password.");
-                            }
+                            MessageBox.Show("Invalid email/username or password.");
+                            return;
                         }
+
+                        if (user.AccountStatus == "Inactive" || !user.IsActive)
+                        {
+                            MessageBox.Show("Your account is inactive. Please contact admin.");
+                            return;
+                        }
+
+                        Session.UserId = user.UserId;
+                        Session.FullName = user.FullName;
+                        Session.Email = user.Email;
+                        Session.Username = user.Email;
+                        Session.Role = user.Role?.RoleName ?? "Customer";
+                        Session.ProfileImagePath = user.ProfileImagePath;
+
+                        // If stored password was plain text, upgrade to SHA-256
+                        if (!PasswordHelper.IsHashed(user.PasswordHash))
+                        {
+                            user.PasswordHash = PasswordHelper.HashPassword(password);
+                            context.SaveChanges();
+                        }
+
+                        MessageBox.Show("Login Successful! Welcome " + Session.FullName);
+                        this.Hide();
+
+                        if (Session.Role == "SuperAdmin")
+                        {
+                            new SuperAdminDashboard().Show();
+                        }
+                        else if (Session.Role == "Admin")
+                        {
+                            new AdminDashboard().Show();
+                        }
+                        else
+                        {
+                            new CustomerDashboard().Show();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Invalid email/username or password.");
                     }
                 }
             }

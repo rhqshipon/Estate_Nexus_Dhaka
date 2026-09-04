@@ -1,7 +1,9 @@
 using System;
-using System.Data;
-using Microsoft.Data.SqlClient;
+using System.Linq;
 using System.Windows.Forms;
+using Microsoft.EntityFrameworkCore;
+using EstateNexus.Data;
+using EstateNexus.Models.Entities;
 
 namespace EstateNexus
 {
@@ -24,34 +26,29 @@ namespace EstateNexus
         {
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                using (var context = new EstateNexusDbContext())
                 {
-                    string query = @"
-                        SELECT p.PropertyId, p.PropertyName, c.CategoryName, p.ListingType, p.Location, p.Price, p.Status 
-                        FROM Properties p
-                        LEFT JOIN PropertyCategories c ON p.CategoryId = c.CategoryId
-                        WHERE p.OwnerId = @OwnerId";
-
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        cmd.Parameters.AddWithValue("@OwnerId", Session.UserId);
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-                        dgvMyProperties.DataSource = dt;
-
-                        // Calculate inventory stats
-                        int total = dt.Rows.Count;
-                        int available = 0;
-                        int sold = 0;
-                        foreach (DataRow row in dt.Rows)
+                    var list = context.Properties
+                        .Where(p => p.OwnerId == Session.UserId)
+                        .Include(p => p.Category)
+                        .Select(p => new
                         {
-                            string status = row["Status"]?.ToString() ?? "";
-                            if (status == "Available") available++;
-                            else sold++;
-                        }
-                        lblPropertyStats.Text = $"Total: {total} | Available: {available} | Sold: {sold}";
-                    }
+                            p.PropertyId,
+                            p.PropertyTitle,
+                            Category = p.Category != null ? p.Category.CategoryName : "",
+                            p.ListingType,
+                            Location = p.District + ", " + p.AreaLocation,
+                            p.Price,
+                            Status = p.PropertyStatus
+                        })
+                        .ToList();
+
+                    dgvMyProperties.DataSource = list;
+
+                    int total = list.Count;
+                    int available = list.Count(p => p.Status == "Available");
+                    int sold = total - available;
+                    lblPropertyStats.Text = $"Total: {total} | Available: {available} | Sold: {sold}";
                 }
             }
             catch (Exception ex)
@@ -60,64 +57,110 @@ namespace EstateNexus
             }
         }
 
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedTab == tabMyProperties)
+            {
+                LoadMyProperties();
+            }
+            else if (tabControl1.SelectedTab == tabVisitRequests)
+            {
+                LoadVisitRequests();
+            }
+            else if (tabControl1.SelectedTab == tabSales)
+            {
+                LoadSales();
+            }
+        }
+
         private void LoadVisitRequests()
         {
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                using (var context = new EstateNexusDbContext())
                 {
-                    string query = @"
-                        SELECT v.VisitId, u.FullName as Customer, u.Phone, p.PropertyName, v.VisitDate, v.VisitTime, v.Status 
-                        FROM VisitRequests v
-                        JOIN Properties p ON v.PropertyId = p.PropertyId
-                        JOIN Users u ON v.CustomerId = u.UserId
-                        WHERE p.OwnerId = @OwnerId";
+                    var query = context.VisitRequests
+                        .Include(v => v.Property)
+                        .Include(v => v.Customer)
+                        .Where(v => v.Property != null && v.Property.OwnerId == Session.UserId);
 
-                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    var rawList = query.ToList();
+
+                    int total = rawList.Count;
+                    int pending = rawList.Count(v => v.RequestStatus == "Pending");
+                    int approved = rawList.Count(v => v.RequestStatus == "Approved");
+                    int rejected = rawList.Count(v => v.RequestStatus == "Rejected");
+                    int cancelled = rawList.Count(v => v.RequestStatus == "Cancelled");
+
+                    lblVisitStats.Text = $"Total: {total} | Pending: {pending} | Approved: {approved} | Rejected: {rejected} | Cancelled: {cancelled}";
+
+                    string filter = cmbVisitFilter.SelectedItem?.ToString() ?? "All";
+                    if (filter != "All")
                     {
-                        cmd.Parameters.AddWithValue("@OwnerId", Session.UserId);
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-                        dgvVisitRequests.DataSource = dt;
+                        rawList = rawList.Where(v => v.RequestStatus.Equals(filter, StringComparison.OrdinalIgnoreCase)).ToList();
                     }
+
+                    var visits = rawList
+                        .OrderBy(v => v.RequestStatus == "Pending" ? 0 : 1)
+                        .ThenByDescending(v => v.CreatedDate)
+                        .Select(v => new
+                        {
+                            VisitId = v.VisitRequestId,
+                            Customer = v.Customer != null ? v.Customer.FullName : "N/A",
+                            Phone = v.Customer != null ? (v.Customer.Phone ?? "N/A") : "N/A",
+                            Email = v.Customer != null ? (v.Customer.Email ?? "N/A") : "N/A",
+                            PropertyTitle = v.Property != null ? v.Property.PropertyTitle : "N/A",
+                            VisitDate = v.VisitDate.ToString("yyyy-MM-dd"),
+                            v.VisitTime,
+                            Status = v.RequestStatus,
+                            CustomerNote = v.CustomerNote ?? "",
+                            RequestedOn = v.CreatedDate.ToString("yyyy-MM-dd HH:mm")
+                        })
+                        .ToList();
+
+                    dgvVisitRequests.DataSource = visits;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading visit requests: " + ex.Message);
+                MessageBox.Show("Error loading visit requests: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void cmbVisitFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadVisitRequests();
+        }
+
+        private void btnRefreshVisitRequests_Click(object sender, EventArgs e)
+        {
+            LoadVisitRequests();
         }
 
         private void LoadSales()
         {
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                using (var context = new EstateNexusDbContext())
                 {
-                    string query = @"
-                        SELECT o.OrderId, u.FullName as CustomerName, p.PropertyName, oi.FinalAmount as Amount, o.OrderDate 
-                        FROM OrderItems oi
-                        JOIN Orders o ON oi.OrderId = o.OrderId
-                        JOIN Properties p ON oi.PropertyId = p.PropertyId
-                        JOIN Users u ON o.CustomerId = u.UserId
-                        WHERE p.OwnerId = @OwnerId";
-
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        cmd.Parameters.AddWithValue("@OwnerId", Session.UserId);
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-                        dgvSales.DataSource = dt;
-
-                        decimal totalEarnings = 0;
-                        foreach (DataRow row in dt.Rows)
+                    var sales = context.OrderItems
+                        .Include(oi => oi.Order).ThenInclude(o => o.Customer)
+                        .Include(oi => oi.Property)
+                        .Where(oi => oi.OwnerId == Session.UserId)
+                        .Select(oi => new
                         {
-                            totalEarnings += Convert.ToDecimal(row["Amount"]);
-                        }
-                        lblTotalEarnings.Text = "Total Earnings from Sales: ৳" + totalEarnings.ToString("N2");
-                    }
+                            oi.OrderId,
+                            CustomerName = oi.Order.Customer != null ? oi.Order.Customer.FullName : "",
+                            PropertyTitle = oi.Property != null ? oi.Property.PropertyTitle : "",
+                            Amount = oi.FinalAmount,
+                            oi.Order.OrderDate
+                        })
+                        .ToList();
+
+                    dgvSales.DataSource = sales;
+
+                    decimal totalEarnings = sales.Sum(s => s.Amount);
+                    lblTotalEarnings.Text = "Total Earnings from Sales: ৳" + totalEarnings.ToString("N2");
                 }
             }
             catch (Exception ex)
@@ -150,15 +193,13 @@ namespace EstateNexus
             {
                 try
                 {
-                    using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                    using (var context = new EstateNexusDbContext())
                     {
-                        string query = "DELETE FROM Properties WHERE PropertyId = @PropertyId AND OwnerId = @OwnerId";
-                        using (SqlCommand cmd = new SqlCommand(query, con))
+                        var prop = context.Properties.FirstOrDefault(p => p.PropertyId == propId && p.OwnerId == Session.UserId);
+                        if (prop != null)
                         {
-                            cmd.Parameters.AddWithValue("@PropertyId", propId);
-                            cmd.Parameters.AddWithValue("@OwnerId", Session.UserId);
-                            con.Open();
-                            cmd.ExecuteNonQuery();
+                            context.Properties.Remove(prop);
+                            context.SaveChanges();
                             MessageBox.Show("Property deleted successfully.");
                             LoadMyProperties();
                         }
@@ -180,22 +221,17 @@ namespace EstateNexus
             }
 
             int propId = Convert.ToInt32(dgvMyProperties.SelectedRows[0].Cells["PropertyId"].Value);
-            string currentStatus = dgvMyProperties.SelectedRows[0].Cells["Status"].Value?.ToString() ?? "Available";
-            string newStatus = currentStatus == "Available" ? "Sold" : "Available";
 
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                using (var context = new EstateNexusDbContext())
                 {
-                    string query = "UPDATE Properties SET Status = @Status WHERE PropertyId = @PropertyId AND OwnerId = @OwnerId";
-                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    var prop = context.Properties.FirstOrDefault(p => p.PropertyId == propId && p.OwnerId == Session.UserId);
+                    if (prop != null)
                     {
-                        cmd.Parameters.AddWithValue("@Status", newStatus);
-                        cmd.Parameters.AddWithValue("@PropertyId", propId);
-                        cmd.Parameters.AddWithValue("@OwnerId", Session.UserId);
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        MessageBox.Show("Property status updated to: " + newStatus);
+                        prop.PropertyStatus = prop.PropertyStatus == "Available" ? "Sold" : "Available";
+                        context.SaveChanges();
+                        MessageBox.Show("Property status updated to: " + prop.PropertyStatus);
                         LoadMyProperties();
                     }
                 }
@@ -220,31 +256,48 @@ namespace EstateNexus
         {
             if (dgvVisitRequests.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Please select a visit request.");
+                MessageBox.Show("Please select a visit request from the list.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             int visitId = Convert.ToInt32(dgvVisitRequests.SelectedRows[0].Cells["VisitId"].Value);
+            string currentStatus = dgvVisitRequests.SelectedRows[0].Cells["Status"].Value?.ToString() ?? "";
+
+            if (currentStatus.Equals(newStatus, StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show($"This visit request is already marked as {newStatus}.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (currentStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+            {
+                var prompt = MessageBox.Show(
+                    $"This visit request was cancelled by the customer.\nDo you still want to change its status to '{newStatus}'?",
+                    "Customer Cancelled Request",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (prompt != DialogResult.Yes)
+                    return;
+            }
 
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                using (var context = new EstateNexusDbContext())
                 {
-                    string query = "UPDATE VisitRequests SET Status = @Status WHERE VisitId = @VisitId";
-                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    var visit = context.VisitRequests.Find(visitId);
+                    if (visit != null)
                     {
-                        cmd.Parameters.AddWithValue("@Status", newStatus);
-                        cmd.Parameters.AddWithValue("@VisitId", visitId);
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        MessageBox.Show("Visit request marked as: " + newStatus);
+                        visit.RequestStatus = newStatus;
+                        context.SaveChanges();
+                        MessageBox.Show($"Visit request marked as: {newStatus}", "Status Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LoadVisitRequests();
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error updating visit request: " + ex.Message);
+                MessageBox.Show("Error updating visit request: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

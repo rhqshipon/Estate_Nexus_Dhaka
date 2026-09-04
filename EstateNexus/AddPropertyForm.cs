@@ -1,7 +1,8 @@
 using System;
-using System.Data;
-using Microsoft.Data.SqlClient;
+using System.Linq;
 using System.Windows.Forms;
+using EstateNexus.Data;
+using EstateNexus.Models.Entities;
 
 namespace EstateNexus
 {
@@ -22,20 +23,16 @@ namespace EstateNexus
         {
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                using (var context = new EstateNexusDbContext())
                 {
-                    string query = "SELECT CategoryId, CategoryName FROM PropertyCategories";
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
+                    var categories = context.PropertyCategories
+                        .Where(c => c.IsActive)
+                        .Select(c => new { c.CategoryId, c.CategoryName })
+                        .ToList();
 
-                        cmbCategory.DisplayMember = "CategoryName";
-                        cmbCategory.ValueMember = "CategoryId";
-                        cmbCategory.DataSource = dt;
-                    }
+                    cmbCategory.DisplayMember = "CategoryName";
+                    cmbCategory.ValueMember = "CategoryId";
+                    cmbCategory.DataSource = categories;
                 }
             }
             catch (Exception ex)
@@ -68,37 +65,62 @@ namespace EstateNexus
             int.TryParse(txtArea.Text.Trim(), out int area);
             int bedrooms = (int)numBedrooms.Value;
             int bathrooms = (int)numBathrooms.Value;
-            int categoryId = Convert.ToInt32(cmbCategory.SelectedValue);
+            if (cmbCategory.SelectedValue == null || !int.TryParse(cmbCategory.SelectedValue.ToString(), out int categoryId) || categoryId <= 0)
+            {
+                MessageBox.Show("Please select a valid property category.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int ownerId = Session.UserId;
+            if (ownerId <= 0)
+            {
+                using var contextCheck = new EstateNexusDbContext();
+                var defaultSeller = contextCheck.Users.FirstOrDefault(u => u.RoleId == 2);
+                if (defaultSeller != null)
+                    ownerId = defaultSeller.UserId;
+            }
+
+            string district = "Dhaka";
+            string areaLocation = location;
+            if (location.Contains(","))
+            {
+                var parts = location.Split(',');
+                areaLocation = parts[0].Trim();
+                if (parts.Length > 1 && !string.IsNullOrWhiteSpace(parts[1]))
+                    district = parts[1].Trim();
+            }
 
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                using (var context = new EstateNexusDbContext())
                 {
-                    string query = @"
-                        INSERT INTO Properties (OwnerId, CategoryId, PropertyName, ListingType, Location, Address, Area, Bedrooms, Bathrooms, Price, Description, Status)
-                        VALUES (@OwnerId, @CategoryId, @PropertyName, @ListingType, @Location, @Address, @Area, @Bedrooms, @Bathrooms, @Price, @Description, 'Available')";
-
-                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    var property = new Property
                     {
-                        cmd.Parameters.AddWithValue("@OwnerId", Session.UserId);
-                        cmd.Parameters.AddWithValue("@CategoryId", categoryId);
-                        cmd.Parameters.AddWithValue("@PropertyName", name);
-                        cmd.Parameters.AddWithValue("@ListingType", listingType);
-                        cmd.Parameters.AddWithValue("@Location", location);
-                        cmd.Parameters.AddWithValue("@Address", address);
-                        cmd.Parameters.AddWithValue("@Area", area);
-                        cmd.Parameters.AddWithValue("@Bedrooms", bedrooms);
-                        cmd.Parameters.AddWithValue("@Bathrooms", bathrooms);
-                        cmd.Parameters.AddWithValue("@Price", price);
-                        cmd.Parameters.AddWithValue("@Description", desc);
+                        OwnerId = ownerId,
+                        CategoryId = categoryId,
+                        PropertyTitle = name,
+                        ListingType = listingType,
+                        District = district,
+                        AreaLocation = areaLocation,
+                        FullAddress = string.IsNullOrEmpty(address) ? location : address,
+                        AreaSize = area > 0 ? (decimal)area : 1000m,
+                        AreaUnit = "sqft",
+                        Bedrooms = bedrooms,
+                        Bathrooms = bathrooms,
+                        Price = price,
+                        Description = desc,
+                        PropertyStatus = "Available",
+                        ApprovalStatus = "Approved",
+                        IsFeatured = false,
+                        CreatedDate = DateTime.Now
+                    };
 
-                        con.Open();
-                        cmd.ExecuteNonQuery();
+                    context.Properties.Add(property);
+                    context.SaveChanges();
 
-                        MessageBox.Show("Property added successfully!");
-                        this.DialogResult = DialogResult.OK;
-                        this.Close();
-                    }
+                    MessageBox.Show("Property added successfully!");
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
                 }
             }
             catch (Exception ex)

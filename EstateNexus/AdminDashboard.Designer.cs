@@ -27,6 +27,10 @@ partial class AdminDashboard
         this.tabVisitRequests = new System.Windows.Forms.TabPage();
         this.btnRejectVisit = new System.Windows.Forms.Button();
         this.btnApproveVisit = new System.Windows.Forms.Button();
+        this.btnRefreshVisitRequests = new System.Windows.Forms.Button();
+        this.lblVisitFilter = new System.Windows.Forms.Label();
+        this.cmbVisitFilter = new System.Windows.Forms.ComboBox();
+        this.lblVisitStats = new System.Windows.Forms.Label();
         this.dgvVisitRequests = new System.Windows.Forms.DataGridView();
         this.tabSales = new System.Windows.Forms.TabPage();
         this.lblTotalEarnings = new System.Windows.Forms.Label();
@@ -67,6 +71,7 @@ partial class AdminDashboard
         this.tabControl1.Name = "tabControl1";
         this.tabControl1.SelectedIndex = 0;
         this.tabControl1.Size = new System.Drawing.Size(930, 495);
+        this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
 
         // tabMyProperties
         this.tabMyProperties.Controls.Add(this.lblPropertyStats);
@@ -126,6 +131,10 @@ partial class AdminDashboard
         this.dgvMyProperties.Size = new System.Drawing.Size(905, 405);
 
         // tabVisitRequests
+        this.tabVisitRequests.Controls.Add(this.lblVisitStats);
+        this.tabVisitRequests.Controls.Add(this.cmbVisitFilter);
+        this.tabVisitRequests.Controls.Add(this.lblVisitFilter);
+        this.tabVisitRequests.Controls.Add(this.btnRefreshVisitRequests);
         this.tabVisitRequests.Controls.Add(this.btnRejectVisit);
         this.tabVisitRequests.Controls.Add(this.btnApproveVisit);
         this.tabVisitRequests.Controls.Add(this.dgvVisitRequests);
@@ -140,18 +149,52 @@ partial class AdminDashboard
         this.btnApproveVisit.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
         this.btnApproveVisit.Location = new System.Drawing.Point(8, 8);
         this.btnApproveVisit.Name = "btnApproveVisit";
-        this.btnApproveVisit.Size = new System.Drawing.Size(140, 32);
-        this.btnApproveVisit.Text = "Approve Visit";
+        this.btnApproveVisit.Size = new System.Drawing.Size(120, 32);
+        this.btnApproveVisit.Text = "Approve";
         this.btnApproveVisit.UseVisualStyleBackColor = true;
         this.btnApproveVisit.Click += new System.EventHandler(this.btnApproveVisit_Click);
 
         // btnRejectVisit
-        this.btnRejectVisit.Location = new System.Drawing.Point(160, 8);
+        this.btnRejectVisit.Location = new System.Drawing.Point(135, 8);
         this.btnRejectVisit.Name = "btnRejectVisit";
-        this.btnRejectVisit.Size = new System.Drawing.Size(140, 32);
-        this.btnRejectVisit.Text = "Reject Visit";
+        this.btnRejectVisit.Size = new System.Drawing.Size(110, 32);
+        this.btnRejectVisit.Text = "Reject";
         this.btnRejectVisit.UseVisualStyleBackColor = true;
         this.btnRejectVisit.Click += new System.EventHandler(this.btnRejectVisit_Click);
+
+        // btnRefreshVisitRequests
+        this.btnRefreshVisitRequests.Location = new System.Drawing.Point(252, 8);
+        this.btnRefreshVisitRequests.Name = "btnRefreshVisitRequests";
+        this.btnRefreshVisitRequests.Size = new System.Drawing.Size(100, 32);
+        this.btnRefreshVisitRequests.Text = "Refresh";
+        this.btnRefreshVisitRequests.UseVisualStyleBackColor = true;
+        this.btnRefreshVisitRequests.Click += new System.EventHandler(this.btnRefreshVisitRequests_Click);
+
+        // lblVisitFilter
+        this.lblVisitFilter.AutoSize = true;
+        this.lblVisitFilter.Location = new System.Drawing.Point(365, 15);
+        this.lblVisitFilter.Name = "lblVisitFilter";
+        this.lblVisitFilter.Size = new System.Drawing.Size(46, 17);
+        this.lblVisitFilter.Text = "Status:";
+
+        // cmbVisitFilter
+        this.cmbVisitFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbVisitFilter.FormattingEnabled = true;
+        this.cmbVisitFilter.Items.AddRange(new object[] { "All", "Pending", "Approved", "Rejected", "Cancelled" });
+        this.cmbVisitFilter.Location = new System.Drawing.Point(415, 11);
+        this.cmbVisitFilter.Name = "cmbVisitFilter";
+        this.cmbVisitFilter.Size = new System.Drawing.Size(110, 25);
+        this.cmbVisitFilter.SelectedIndex = 0;
+        this.cmbVisitFilter.SelectedIndexChanged += new System.EventHandler(this.cmbVisitFilter_SelectedIndexChanged);
+
+        // lblVisitStats
+        this.lblVisitStats.AutoSize = true;
+        this.lblVisitStats.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.lblVisitStats.ForeColor = System.Drawing.Color.DimGray;
+        this.lblVisitStats.Location = new System.Drawing.Point(540, 15);
+        this.lblVisitStats.Name = "lblVisitStats";
+        this.lblVisitStats.Size = new System.Drawing.Size(60, 17);
+        this.lblVisitStats.Text = "Total: 0";
 
         // dgvVisitRequests
         this.dgvVisitRequests.AllowUserToAddRows = false;
@@ -230,6 +273,10 @@ partial class AdminDashboard
     private System.Windows.Forms.DataGridView dgvVisitRequests;
     private System.Windows.Forms.Button btnApproveVisit;
     private System.Windows.Forms.Button btnRejectVisit;
+    private System.Windows.Forms.Button btnRefreshVisitRequests;
+    private System.Windows.Forms.Label lblVisitFilter;
+    private System.Windows.Forms.ComboBox cmbVisitFilter;
+    private System.Windows.Forms.Label lblVisitStats;
     private System.Windows.Forms.TabPage tabSales;
     private System.Windows.Forms.DataGridView dgvSales;
     private System.Windows.Forms.Label lblTotalEarnings;
