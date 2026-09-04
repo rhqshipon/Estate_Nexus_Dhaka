@@ -1,7 +1,10 @@
 using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
+using System.Linq;
 using System.Windows.Forms;
+using Microsoft.EntityFrameworkCore;
+using EstateNexus.Data;
+using EstateNexus.Models.Entities;
 
 namespace EstateNexus
 {
@@ -24,13 +27,23 @@ namespace EstateNexus
         {
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
-                {
-                    SqlDataAdapter da = new SqlDataAdapter("SELECT UserId, FullName, Username, Email, Phone, Role, AccountStatus, CreatedAt FROM Users", con);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgvUsers.DataSource = dt;
-                }
+                using var context = new EstateNexusDbContext();
+                var users = context.Users
+                    .Include(u => u.Role)
+                    .Select(u => new
+                    {
+                        u.UserId,
+                        u.FullName,
+                        u.Email,
+                        u.Phone,
+                        Role = u.Role != null ? u.Role.RoleName : "",
+                        u.AccountStatus,
+                        u.IsActive,
+                        u.CreatedDate
+                    })
+                    .ToList();
+
+                dgvUsers.DataSource = users;
             }
             catch (Exception ex)
             {
@@ -42,19 +55,24 @@ namespace EstateNexus
         {
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
-                {
-                    string query = @"
-                        SELECT p.PropertyId, u.FullName as Owner, p.PropertyName, c.CategoryName, p.ListingType, p.Location, p.Price, p.Status 
-                        FROM Properties p
-                        LEFT JOIN Users u ON p.OwnerId = u.UserId
-                        LEFT JOIN PropertyCategories c ON p.CategoryId = c.CategoryId";
+                using var context = new EstateNexusDbContext();
+                var properties = context.Properties
+                    .Include(p => p.Owner)
+                    .Include(p => p.Category)
+                    .Select(p => new
+                    {
+                        p.PropertyId,
+                        Owner = p.Owner != null ? p.Owner.FullName : "",
+                        PropertyTitle = p.PropertyTitle,
+                        CategoryName = p.Category != null ? p.Category.CategoryName : "",
+                        p.ListingType,
+                        Location = p.District + ", " + p.AreaLocation,
+                        p.Price,
+                        Status = p.PropertyStatus
+                    })
+                    .ToList();
 
-                    SqlDataAdapter da = new SqlDataAdapter(query, con);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgvProperties.DataSource = dt;
-                }
+                dgvProperties.DataSource = properties;
             }
             catch (Exception ex)
             {
@@ -66,29 +84,29 @@ namespace EstateNexus
         {
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
-                {
-                    string query = @"
-                        SELECT o.OrderId, u.FullName as Customer, o.TotalAmount, o.PaymentMethod, o.OrderDate, o.Status 
-                        FROM Orders o
-                        JOIN Users u ON o.CustomerId = u.UserId
-                        ORDER BY o.OrderDate DESC";
-
-                    SqlDataAdapter da = new SqlDataAdapter(query, con);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgvAllOrders.DataSource = dt;
-
-                    decimal totalVol = 0;
-                    foreach (DataRow row in dt.Rows)
+                using var context = new EstateNexusDbContext();
+                var orders = context.Orders
+                    .Include(o => o.Customer)
+                    .Include(o => o.Payments)
+                    .OrderByDescending(o => o.OrderDate)
+                    .Select(o => new
                     {
-                        totalVol += Convert.ToDecimal(row["TotalAmount"]);
-                    }
-                    decimal commission = totalVol * 0.05m; // 5% platform commission
+                        o.OrderId,
+                        Customer = o.Customer != null ? o.Customer.FullName : "",
+                        o.TotalAmount,
+                        PaymentMethod = o.Payments.Any() ? o.Payments.First().PaymentMethod : "Card",
+                        o.OrderDate,
+                        Status = o.OrderStatus
+                    })
+                    .ToList();
 
-                    lblRevenue.Text = "Total Marketplace Volume: ৳" + totalVol.ToString("N2");
-                    lblCommission.Text = "Platform Commission (5%): ৳" + commission.ToString("N2");
-                }
+                dgvAllOrders.DataSource = orders;
+
+                decimal totalVol = orders.Sum(o => o.TotalAmount);
+                decimal commission = Math.Round(totalVol * 0.05m, 2);
+
+                lblRevenue.Text = "Total Marketplace Volume: ৳" + totalVol.ToString("N2");
+                lblCommission.Text = "Platform Commission (5%): ৳" + commission.ToString("N2");
             }
             catch
             {
@@ -113,23 +131,17 @@ namespace EstateNexus
                 return;
             }
 
-            string currentStatus = dgvUsers.SelectedRows[0].Cells["AccountStatus"].Value?.ToString() ?? "Active";
-            string newStatus = currentStatus == "Active" ? "Inactive" : "Active";
-
             try
             {
-                using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                using var context = new EstateNexusDbContext();
+                var user = context.Users.Find(userId);
+                if (user != null)
                 {
-                    string query = "UPDATE Users SET AccountStatus = @Status WHERE UserId = @UserId";
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        cmd.Parameters.AddWithValue("@Status", newStatus);
-                        cmd.Parameters.AddWithValue("@UserId", userId);
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        MessageBox.Show("User status changed to: " + newStatus);
-                        LoadUsers();
-                    }
+                    user.AccountStatus = user.AccountStatus == "Active" ? "Inactive" : "Active";
+                    user.IsActive = user.AccountStatus == "Active";
+                    context.SaveChanges();
+                    MessageBox.Show("User status changed to: " + user.AccountStatus);
+                    LoadUsers();
                 }
             }
             catch (Exception ex)
@@ -159,17 +171,14 @@ namespace EstateNexus
             {
                 try
                 {
-                    using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                    using var context = new EstateNexusDbContext();
+                    var user = context.Users.Find(userId);
+                    if (user != null)
                     {
-                        string query = "DELETE FROM Users WHERE UserId = @UserId";
-                        using (SqlCommand cmd = new SqlCommand(query, con))
-                        {
-                            cmd.Parameters.AddWithValue("@UserId", userId);
-                            con.Open();
-                            cmd.ExecuteNonQuery();
-                            MessageBox.Show("User deleted successfully.");
-                            LoadUsers();
-                        }
+                        context.Users.Remove(user);
+                        context.SaveChanges();
+                        MessageBox.Show("User deleted successfully.");
+                        LoadUsers();
                     }
                 }
                 catch (Exception ex)
@@ -194,17 +203,14 @@ namespace EstateNexus
             {
                 try
                 {
-                    using (SqlConnection con = new SqlConnection(DatabaseSetup.ConnectionString))
+                    using var context = new EstateNexusDbContext();
+                    var prop = context.Properties.Find(propId);
+                    if (prop != null)
                     {
-                        string query = "DELETE FROM Properties WHERE PropertyId = @PropertyId";
-                        using (SqlCommand cmd = new SqlCommand(query, con))
-                        {
-                            cmd.Parameters.AddWithValue("@PropertyId", propId);
-                            con.Open();
-                            cmd.ExecuteNonQuery();
-                            MessageBox.Show("Property removed from platform.");
-                            LoadProperties();
-                        }
+                        context.Properties.Remove(prop);
+                        context.SaveChanges();
+                        MessageBox.Show("Property removed from platform.");
+                        LoadProperties();
                     }
                 }
                 catch (Exception ex)

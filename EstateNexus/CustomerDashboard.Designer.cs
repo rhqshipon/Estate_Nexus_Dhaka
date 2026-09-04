@@ -35,6 +35,9 @@ partial class CustomerDashboard
         this.dgvOrders = new System.Windows.Forms.DataGridView();
         this.tabMyVisits = new System.Windows.Forms.TabPage();
         this.dgvMyVisits = new System.Windows.Forms.DataGridView();
+        this.btnRefreshVisits = new System.Windows.Forms.Button();
+        this.btnCancelVisit = new System.Windows.Forms.Button();
+        this.lblVisitStatusSummary = new System.Windows.Forms.Label();
         this.tabReviews = new System.Windows.Forms.TabPage();
         this.lblSelectProperty = new System.Windows.Forms.Label();
         this.cmbReviewProperty = new System.Windows.Forms.ComboBox();
@@ -45,9 +48,28 @@ partial class CustomerDashboard
         this.btnSubmitReview = new System.Windows.Forms.Button();
         this.dgvReviews = new System.Windows.Forms.DataGridView();
 
+        this.lblRentalMonths = new System.Windows.Forms.Label();
+        this.numRentalMonths = new System.Windows.Forms.NumericUpDown();
+        this.tabProfile = new System.Windows.Forms.TabPage();
+        this.lblProfileHeader = new System.Windows.Forms.Label();
+        this.lblProfileFullName = new System.Windows.Forms.Label();
+        this.txtProfileFullName = new System.Windows.Forms.TextBox();
+        this.lblProfileEmail = new System.Windows.Forms.Label();
+        this.txtProfileEmail = new System.Windows.Forms.TextBox();
+        this.lblProfilePhone = new System.Windows.Forms.Label();
+        this.txtProfilePhone = new System.Windows.Forms.TextBox();
+        this.lblProfileAddress = new System.Windows.Forms.Label();
+        this.txtProfileAddress = new System.Windows.Forms.TextBox();
+        this.lblProfileImagePath = new System.Windows.Forms.Label();
+        this.txtProfileImagePath = new System.Windows.Forms.TextBox();
+        this.btnBrowseProfileImage = new System.Windows.Forms.Button();
+        this.picProfilePreview = new System.Windows.Forms.PictureBox();
+        this.btnSaveProfile = new System.Windows.Forms.Button();
+
         this.tabControl1.SuspendLayout();
         this.tabBrowse.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)(this.dgvBrowseProperties)).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)(this.numRentalMonths)).BeginInit();
         this.tabCart.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)(this.dgvCart)).BeginInit();
         this.tabOrders.SuspendLayout();
@@ -57,6 +79,8 @@ partial class CustomerDashboard
         this.tabReviews.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)(this.numRating)).BeginInit();
         ((System.ComponentModel.ISupportInitialize)(this.dgvReviews)).BeginInit();
+        this.tabProfile.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)(this.picProfilePreview)).BeginInit();
         this.SuspendLayout();
 
         // lblTitle
@@ -82,11 +106,13 @@ partial class CustomerDashboard
         this.tabControl1.Controls.Add(this.tabOrders);
         this.tabControl1.Controls.Add(this.tabMyVisits);
         this.tabControl1.Controls.Add(this.tabReviews);
+        this.tabControl1.Controls.Add(this.tabProfile);
         this.tabControl1.Font = new System.Drawing.Font("Segoe UI", 9.5F);
         this.tabControl1.Location = new System.Drawing.Point(15, 55);
         this.tabControl1.Name = "tabControl1";
         this.tabControl1.SelectedIndex = 0;
         this.tabControl1.Size = new System.Drawing.Size(930, 495);
+        this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
 
         // tabBrowse
         this.tabBrowse.Controls.Add(this.lblFilter);
@@ -96,6 +122,8 @@ partial class CustomerDashboard
         this.tabBrowse.Controls.Add(this.dgvBrowseProperties);
         this.tabBrowse.Controls.Add(this.btnAddToCart);
         this.tabBrowse.Controls.Add(this.btnRequestVisit);
+        this.tabBrowse.Controls.Add(this.lblRentalMonths);
+        this.tabBrowse.Controls.Add(this.numRentalMonths);
         this.tabBrowse.Location = new System.Drawing.Point(4, 26);
         this.tabBrowse.Name = "tabBrowse";
         this.tabBrowse.Padding = new System.Windows.Forms.Padding(3);
@@ -159,6 +187,21 @@ partial class CustomerDashboard
         this.btnRequestVisit.Text = "Schedule Visit";
         this.btnRequestVisit.UseVisualStyleBackColor = true;
         this.btnRequestVisit.Click += new System.EventHandler(this.btnRequestVisit_Click);
+
+        // lblRentalMonths
+        this.lblRentalMonths.AutoSize = true;
+        this.lblRentalMonths.Location = new System.Drawing.Point(360, 428);
+        this.lblRentalMonths.Name = "lblRentalMonths";
+        this.lblRentalMonths.Size = new System.Drawing.Size(107, 17);
+        this.lblRentalMonths.Text = "Months (if Rent):";
+
+        // numRentalMonths
+        this.numRentalMonths.Location = new System.Drawing.Point(475, 425);
+        this.numRentalMonths.Maximum = new decimal(new int[] { 60, 0, 0, 0 });
+        this.numRentalMonths.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+        this.numRentalMonths.Name = "numRentalMonths";
+        this.numRentalMonths.Size = new System.Drawing.Size(65, 24);
+        this.numRentalMonths.Value = new decimal(new int[] { 1, 0, 0, 0 });
 
         // tabCart
         this.tabCart.Controls.Add(this.lblCartTotal);
@@ -230,6 +273,9 @@ partial class CustomerDashboard
         this.dgvOrders.Size = new System.Drawing.Size(916, 459);
 
         // tabMyVisits
+        this.tabMyVisits.Controls.Add(this.btnRefreshVisits);
+        this.tabMyVisits.Controls.Add(this.btnCancelVisit);
+        this.tabMyVisits.Controls.Add(this.lblVisitStatusSummary);
         this.tabMyVisits.Controls.Add(this.dgvMyVisits);
         this.tabMyVisits.Location = new System.Drawing.Point(4, 26);
         this.tabMyVisits.Name = "tabMyVisits";
@@ -238,16 +284,41 @@ partial class CustomerDashboard
         this.tabMyVisits.Text = "My Visit Requests";
         this.tabMyVisits.UseVisualStyleBackColor = true;
 
+        // btnRefreshVisits
+        this.btnRefreshVisits.Location = new System.Drawing.Point(8, 8);
+        this.btnRefreshVisits.Name = "btnRefreshVisits";
+        this.btnRefreshVisits.Size = new System.Drawing.Size(120, 32);
+        this.btnRefreshVisits.Text = "Refresh Visits";
+        this.btnRefreshVisits.UseVisualStyleBackColor = true;
+        this.btnRefreshVisits.Click += new System.EventHandler(this.btnRefreshVisits_Click);
+
+        // btnCancelVisit
+        this.btnCancelVisit.Location = new System.Drawing.Point(138, 8);
+        this.btnCancelVisit.Name = "btnCancelVisit";
+        this.btnCancelVisit.Size = new System.Drawing.Size(140, 32);
+        this.btnCancelVisit.Text = "Cancel Request";
+        this.btnCancelVisit.UseVisualStyleBackColor = true;
+        this.btnCancelVisit.Click += new System.EventHandler(this.btnCancelVisit_Click);
+
+        // lblVisitStatusSummary
+        this.lblVisitStatusSummary.AutoSize = true;
+        this.lblVisitStatusSummary.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.lblVisitStatusSummary.ForeColor = System.Drawing.Color.DimGray;
+        this.lblVisitStatusSummary.Location = new System.Drawing.Point(295, 15);
+        this.lblVisitStatusSummary.Name = "lblVisitStatusSummary";
+        this.lblVisitStatusSummary.Size = new System.Drawing.Size(60, 17);
+        this.lblVisitStatusSummary.Text = "Total: 0";
+
         // dgvMyVisits
         this.dgvMyVisits.AllowUserToAddRows = false;
         this.dgvMyVisits.AllowUserToDeleteRows = false;
         this.dgvMyVisits.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        this.dgvMyVisits.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.dgvMyVisits.Location = new System.Drawing.Point(3, 3);
+        this.dgvMyVisits.Location = new System.Drawing.Point(8, 48);
+        this.dgvMyVisits.MultiSelect = false;
         this.dgvMyVisits.Name = "dgvMyVisits";
         this.dgvMyVisits.ReadOnly = true;
         this.dgvMyVisits.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-        this.dgvMyVisits.Size = new System.Drawing.Size(916, 459);
+        this.dgvMyVisits.Size = new System.Drawing.Size(905, 405);
 
         // tabReviews
         this.tabReviews.Controls.Add(this.lblSelectProperty);
@@ -327,6 +398,122 @@ partial class CustomerDashboard
         this.btnSubmitReview.UseVisualStyleBackColor = true;
         this.btnSubmitReview.Click += new System.EventHandler(this.btnSubmitReview_Click);
 
+        // tabProfile
+        this.tabProfile.Controls.Add(this.lblProfileHeader);
+        this.tabProfile.Controls.Add(this.lblProfileFullName);
+        this.tabProfile.Controls.Add(this.txtProfileFullName);
+        this.tabProfile.Controls.Add(this.lblProfileEmail);
+        this.tabProfile.Controls.Add(this.txtProfileEmail);
+        this.tabProfile.Controls.Add(this.lblProfilePhone);
+        this.tabProfile.Controls.Add(this.txtProfilePhone);
+        this.tabProfile.Controls.Add(this.lblProfileAddress);
+        this.tabProfile.Controls.Add(this.txtProfileAddress);
+        this.tabProfile.Controls.Add(this.lblProfileImagePath);
+        this.tabProfile.Controls.Add(this.txtProfileImagePath);
+        this.tabProfile.Controls.Add(this.btnBrowseProfileImage);
+        this.tabProfile.Controls.Add(this.picProfilePreview);
+        this.tabProfile.Controls.Add(this.btnSaveProfile);
+        this.tabProfile.Location = new System.Drawing.Point(4, 26);
+        this.tabProfile.Name = "tabProfile";
+        this.tabProfile.Padding = new System.Windows.Forms.Padding(3);
+        this.tabProfile.Size = new System.Drawing.Size(922, 465);
+        this.tabProfile.Text = "My Profile & Settings";
+        this.tabProfile.UseVisualStyleBackColor = true;
+
+        // lblProfileHeader
+        this.lblProfileHeader.AutoSize = true;
+        this.lblProfileHeader.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+        this.lblProfileHeader.Location = new System.Drawing.Point(20, 20);
+        this.lblProfileHeader.Name = "lblProfileHeader";
+        this.lblProfileHeader.Size = new System.Drawing.Size(250, 25);
+        this.lblProfileHeader.Text = "User Profile & Settings";
+
+        // lblProfileFullName
+        this.lblProfileFullName.AutoSize = true;
+        this.lblProfileFullName.Location = new System.Drawing.Point(20, 70);
+        this.lblProfileFullName.Name = "lblProfileFullName";
+        this.lblProfileFullName.Size = new System.Drawing.Size(69, 17);
+        this.lblProfileFullName.Text = "Full Name:";
+
+        // txtProfileFullName
+        this.txtProfileFullName.Location = new System.Drawing.Point(150, 67);
+        this.txtProfileFullName.Name = "txtProfileFullName";
+        this.txtProfileFullName.Size = new System.Drawing.Size(320, 24);
+
+        // lblProfileEmail
+        this.lblProfileEmail.AutoSize = true;
+        this.lblProfileEmail.Location = new System.Drawing.Point(20, 110);
+        this.lblProfileEmail.Name = "lblProfileEmail";
+        this.lblProfileEmail.Size = new System.Drawing.Size(42, 17);
+        this.lblProfileEmail.Text = "Email:";
+
+        // txtProfileEmail
+        this.txtProfileEmail.Location = new System.Drawing.Point(150, 107);
+        this.txtProfileEmail.Name = "txtProfileEmail";
+        this.txtProfileEmail.ReadOnly = true;
+        this.txtProfileEmail.Size = new System.Drawing.Size(320, 24);
+
+        // lblProfilePhone
+        this.lblProfilePhone.AutoSize = true;
+        this.lblProfilePhone.Location = new System.Drawing.Point(20, 150);
+        this.lblProfilePhone.Name = "lblProfilePhone";
+        this.lblProfilePhone.Size = new System.Drawing.Size(47, 17);
+        this.lblProfilePhone.Text = "Phone:";
+
+        // txtProfilePhone
+        this.txtProfilePhone.Location = new System.Drawing.Point(150, 147);
+        this.txtProfilePhone.Name = "txtProfilePhone";
+        this.txtProfilePhone.Size = new System.Drawing.Size(320, 24);
+
+        // lblProfileAddress
+        this.lblProfileAddress.AutoSize = true;
+        this.lblProfileAddress.Location = new System.Drawing.Point(20, 190);
+        this.lblProfileAddress.Name = "lblProfileAddress";
+        this.lblProfileAddress.Size = new System.Drawing.Size(59, 17);
+        this.lblProfileAddress.Text = "Address:";
+
+        // txtProfileAddress
+        this.txtProfileAddress.Location = new System.Drawing.Point(150, 187);
+        this.txtProfileAddress.Name = "txtProfileAddress";
+        this.txtProfileAddress.Size = new System.Drawing.Size(320, 24);
+
+        // lblProfileImagePath
+        this.lblProfileImagePath.AutoSize = true;
+        this.lblProfileImagePath.Location = new System.Drawing.Point(20, 230);
+        this.lblProfileImagePath.Name = "lblProfileImagePath";
+        this.lblProfileImagePath.Size = new System.Drawing.Size(117, 17);
+        this.lblProfileImagePath.Text = "Profile Image Path:";
+
+        // txtProfileImagePath
+        this.txtProfileImagePath.Location = new System.Drawing.Point(150, 227);
+        this.txtProfileImagePath.Name = "txtProfileImagePath";
+        this.txtProfileImagePath.Size = new System.Drawing.Size(320, 24);
+
+        // btnBrowseProfileImage
+        this.btnBrowseProfileImage.Location = new System.Drawing.Point(480, 226);
+        this.btnBrowseProfileImage.Name = "btnBrowseProfileImage";
+        this.btnBrowseProfileImage.Size = new System.Drawing.Size(85, 27);
+        this.btnBrowseProfileImage.Text = "Browse...";
+        this.btnBrowseProfileImage.UseVisualStyleBackColor = true;
+        this.btnBrowseProfileImage.Click += new System.EventHandler(this.btnBrowseProfileImage_Click);
+
+        // picProfilePreview
+        this.picProfilePreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+        this.picProfilePreview.Location = new System.Drawing.Point(590, 67);
+        this.picProfilePreview.Name = "picProfilePreview";
+        this.picProfilePreview.Size = new System.Drawing.Size(180, 180);
+        this.picProfilePreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+        this.picProfilePreview.TabStop = false;
+
+        // btnSaveProfile
+        this.btnSaveProfile.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.btnSaveProfile.Location = new System.Drawing.Point(150, 280);
+        this.btnSaveProfile.Name = "btnSaveProfile";
+        this.btnSaveProfile.Size = new System.Drawing.Size(180, 35);
+        this.btnSaveProfile.Text = "Save Profile Settings";
+        this.btnSaveProfile.UseVisualStyleBackColor = true;
+        this.btnSaveProfile.Click += new System.EventHandler(this.btnSaveProfile_Click);
+
         // CustomerDashboard
         this.ClientSize = new System.Drawing.Size(960, 565);
         this.Controls.Add(this.tabControl1);
@@ -342,6 +529,7 @@ partial class CustomerDashboard
         this.tabBrowse.ResumeLayout(false);
         this.tabBrowse.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)(this.dgvBrowseProperties)).EndInit();
+        ((System.ComponentModel.ISupportInitialize)(this.numRentalMonths)).EndInit();
         this.tabCart.ResumeLayout(false);
         this.tabCart.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)(this.dgvCart)).EndInit();
@@ -353,6 +541,9 @@ partial class CustomerDashboard
         this.tabReviews.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)(this.numRating)).EndInit();
         ((System.ComponentModel.ISupportInitialize)(this.dgvReviews)).EndInit();
+        this.tabProfile.ResumeLayout(false);
+        this.tabProfile.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)(this.picProfilePreview)).EndInit();
         this.ResumeLayout(false);
         this.PerformLayout();
     }
@@ -368,6 +559,8 @@ partial class CustomerDashboard
     private System.Windows.Forms.DataGridView dgvBrowseProperties;
     private System.Windows.Forms.Button btnAddToCart;
     private System.Windows.Forms.Button btnRequestVisit;
+    private System.Windows.Forms.Label lblRentalMonths;
+    private System.Windows.Forms.NumericUpDown numRentalMonths;
     private System.Windows.Forms.TabPage tabCart;
     private System.Windows.Forms.DataGridView dgvCart;
     private System.Windows.Forms.Button btnRemoveFromCart;
@@ -377,6 +570,9 @@ partial class CustomerDashboard
     private System.Windows.Forms.DataGridView dgvOrders;
     private System.Windows.Forms.TabPage tabMyVisits;
     private System.Windows.Forms.DataGridView dgvMyVisits;
+    private System.Windows.Forms.Button btnRefreshVisits;
+    private System.Windows.Forms.Button btnCancelVisit;
+    private System.Windows.Forms.Label lblVisitStatusSummary;
     private System.Windows.Forms.TabPage tabReviews;
     private System.Windows.Forms.DataGridView dgvReviews;
     private System.Windows.Forms.Label lblSelectProperty;
@@ -386,4 +582,19 @@ partial class CustomerDashboard
     private System.Windows.Forms.Label lblComment;
     private System.Windows.Forms.TextBox txtReviewComment;
     private System.Windows.Forms.Button btnSubmitReview;
+    private System.Windows.Forms.TabPage tabProfile;
+    private System.Windows.Forms.Label lblProfileHeader;
+    private System.Windows.Forms.Label lblProfileFullName;
+    private System.Windows.Forms.TextBox txtProfileFullName;
+    private System.Windows.Forms.Label lblProfileEmail;
+    private System.Windows.Forms.TextBox txtProfileEmail;
+    private System.Windows.Forms.Label lblProfilePhone;
+    private System.Windows.Forms.TextBox txtProfilePhone;
+    private System.Windows.Forms.Label lblProfileAddress;
+    private System.Windows.Forms.TextBox txtProfileAddress;
+    private System.Windows.Forms.Label lblProfileImagePath;
+    private System.Windows.Forms.TextBox txtProfileImagePath;
+    private System.Windows.Forms.Button btnBrowseProfileImage;
+    private System.Windows.Forms.PictureBox picProfilePreview;
+    private System.Windows.Forms.Button btnSaveProfile;
 }
