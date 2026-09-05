@@ -1,10 +1,8 @@
 using System;
-using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 using Microsoft.EntityFrameworkCore;
 using EstateNexus.Data;
-using EstateNexus.Models.Entities;
 
 namespace EstateNexus
 {
@@ -15,19 +13,30 @@ namespace EstateNexus
             InitializeComponent();
         }
 
+        // ==========================================
+        // FORM LOAD
+        // ==========================================
+
         private void SuperAdminDashboard_Load(object sender, EventArgs e)
         {
             lblTitle.Text = "Super Admin Dashboard - " + Session.FullName;
+
             LoadUsers();
             LoadProperties();
             LoadRevenue();
         }
+
+
+        // ==========================================
+        // LOAD USERS
+        // ==========================================
 
         private void LoadUsers()
         {
             try
             {
                 using var context = new EstateNexusDbContext();
+
                 var users = context.Users
                     .Include(u => u.Role)
                     .Select(u => new
@@ -36,7 +45,11 @@ namespace EstateNexus
                         u.FullName,
                         u.Email,
                         u.Phone,
-                        Role = u.Role != null ? u.Role.RoleName : "",
+
+                        Role = u.Role != null
+                            ? u.Role.RoleName
+                            : "",
+
                         u.AccountStatus,
                         u.IsActive,
                         u.CreatedDate
@@ -47,27 +60,49 @@ namespace EstateNexus
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading users: " + ex.Message);
+                MessageBox.Show(
+                    "Error loading users:\n" + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
         }
+
+
+        // ==========================================
+        // LOAD PROPERTIES
+        // ==========================================
 
         private void LoadProperties()
         {
             try
             {
                 using var context = new EstateNexusDbContext();
+
                 var properties = context.Properties
                     .Include(p => p.Owner)
                     .Include(p => p.Category)
                     .Select(p => new
                     {
                         p.PropertyId,
-                        Owner = p.Owner != null ? p.Owner.FullName : "",
+
+                        Owner = p.Owner != null
+                            ? p.Owner.FullName
+                            : "",
+
                         PropertyTitle = p.PropertyTitle,
-                        CategoryName = p.Category != null ? p.Category.CategoryName : "",
+
+                        CategoryName = p.Category != null
+                            ? p.Category.CategoryName
+                            : "",
+
                         p.ListingType,
+
                         Location = p.District + ", " + p.AreaLocation,
+
                         p.Price,
+
                         Status = p.PropertyStatus
                     })
                     .ToList();
@@ -76,15 +111,26 @@ namespace EstateNexus
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading properties: " + ex.Message);
+                MessageBox.Show(
+                    "Error loading properties:\n" + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
         }
+
+
+        // ==========================================
+        // LOAD REVENUE AND ORDERS
+        // ==========================================
 
         private void LoadRevenue()
         {
             try
             {
                 using var context = new EstateNexusDbContext();
+
                 var orders = context.Orders
                     .Include(o => o.Customer)
                     .Include(o => o.Payments)
@@ -92,144 +138,393 @@ namespace EstateNexus
                     .Select(o => new
                     {
                         o.OrderId,
-                        Customer = o.Customer != null ? o.Customer.FullName : "",
+
+                        Customer = o.Customer != null
+                            ? o.Customer.FullName
+                            : "",
+
                         o.TotalAmount,
-                        PaymentMethod = o.Payments.Any() ? o.Payments.First().PaymentMethod : "Card",
+
+                        PaymentMethod = o.Payments.Any()
+                            ? o.Payments.First().PaymentMethod
+                            : "N/A",
+
                         o.OrderDate,
+
                         Status = o.OrderStatus
                     })
                     .ToList();
 
                 dgvAllOrders.DataSource = orders;
 
-                decimal totalVol = orders.Sum(o => o.TotalAmount);
-                decimal commission = Math.Round(totalVol * 0.05m, 2);
+                // Calculate total marketplace volume
+                decimal totalVolume = 0;
 
-                lblRevenue.Text = "Total Marketplace Volume: ৳" + totalVol.ToString("N2");
-                lblCommission.Text = "Platform Commission (5%): ৳" + commission.ToString("N2");
+                foreach (var order in orders)
+                {
+                    totalVolume += order.TotalAmount;
+                }
+
+                // 5% platform commission
+                decimal commission = totalVolume * 0.05m;
+
+                lblRevenue.Text =
+                    "Total Marketplace Volume: ৳" +
+                    totalVolume.ToString("N2");
+
+                lblCommission.Text =
+                    "Platform Commission (5%): ৳" +
+                    commission.ToString("N2");
             }
-            catch
+            catch (Exception ex)
             {
-                lblRevenue.Text = "Total Marketplace Volume: ৳0.00";
-                lblCommission.Text = "Platform Commission (5%): ৳0.00";
+                dgvAllOrders.DataSource = null;
+
+                lblRevenue.Text =
+                    "Total Marketplace Volume: ৳0.00";
+
+                lblCommission.Text =
+                    "Platform Commission (5%): ৳0.00";
+
+                MessageBox.Show(
+                    "Error loading revenue:\n" + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
         }
+
+
+        // ==========================================
+        // TOGGLE USER ACTIVE / INACTIVE
+        // ==========================================
 
         private void btnToggleStatus_Click(object sender, EventArgs e)
         {
             if (dgvUsers.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Please select a user to toggle status.");
+                MessageBox.Show(
+                    "Please select a user first."
+                );
+
                 return;
             }
 
-            int userId = Convert.ToInt32(dgvUsers.SelectedRows[0].Cells["UserId"].Value);
 
+            int userId = Convert.ToInt32(
+                dgvUsers.SelectedRows[0]
+                    .Cells["UserId"]
+                    .Value
+            );
+
+
+            // Super Admin cannot deactivate himself
             if (userId == Session.UserId)
             {
-                MessageBox.Show("You cannot deactivate or change the status of your own Super Admin account!", "Action Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(
+                    "You cannot change the status of your own Super Admin account!",
+                    "Action Denied",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+
                 return;
             }
+
 
             try
             {
                 using var context = new EstateNexusDbContext();
+
                 var user = context.Users.Find(userId);
-                if (user != null)
+
+                if (user == null)
                 {
-                    user.AccountStatus = user.AccountStatus == "Active" ? "Inactive" : "Active";
-                    user.IsActive = user.AccountStatus == "Active";
-                    context.SaveChanges();
-                    MessageBox.Show("User status changed to: " + user.AccountStatus);
-                    LoadUsers();
+                    MessageBox.Show(
+                        "User not found."
+                    );
+
+                    return;
                 }
+
+
+                // ======================================
+                // DEACTIVATE USER
+                // ======================================
+
+                if (user.IsActive)
+                {
+                    user.IsActive = false;
+
+                    // "Inactive" is NOT allowed by your
+                    // database CHECK constraint.
+                    // Therefore use "Suspended".
+                    user.AccountStatus = "Suspended";
+
+                    context.SaveChanges();
+
+                    MessageBox.Show(
+                        "User has been suspended successfully."
+                    );
+                }
+
+
+                // ======================================
+                // ACTIVATE USER AGAIN
+                // ======================================
+
+                else
+                {
+                    user.IsActive = true;
+
+                    // Valid value according to
+                    // CHK_Users_AccountStatus
+                    user.AccountStatus = "Pending";
+
+                    context.SaveChanges();
+
+                    MessageBox.Show(
+                        "User has been activated successfully.\n\n" +
+                        "Account status is now Pending."
+                    );
+                }
+
+
+                LoadUsers();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error updating user status: " + ex.Message);
+                MessageBox.Show(
+                    "Error updating user status:\n\n" +
+                    ex.Message,
+
+                    "Error",
+
+                    MessageBoxButtons.OK,
+
+                    MessageBoxIcon.Error
+                );
             }
         }
+
+
+        // ==========================================
+        // DELETE USER
+        // ==========================================
 
         private void btnDeleteUser_Click(object sender, EventArgs e)
         {
             if (dgvUsers.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Please select a user to delete.");
+                MessageBox.Show(
+                    "Please select a user to delete."
+                );
+
                 return;
             }
 
-            int userId = Convert.ToInt32(dgvUsers.SelectedRows[0].Cells["UserId"].Value);
 
+            int userId = Convert.ToInt32(
+                dgvUsers.SelectedRows[0]
+                    .Cells["UserId"]
+                    .Value
+            );
+
+
+            // Prevent Super Admin from deleting himself
             if (userId == Session.UserId)
             {
-                MessageBox.Show("You cannot delete your own Super Admin account!");
+                MessageBox.Show(
+                    "You cannot delete your own Super Admin account!",
+
+                    "Action Denied",
+
+                    MessageBoxButtons.OK,
+
+                    MessageBoxIcon.Warning
+                );
+
                 return;
             }
 
-            DialogResult confirm = MessageBox.Show("Are you sure you want to delete this user? This will also remove their associated data.", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (confirm == DialogResult.Yes)
+
+            DialogResult confirm = MessageBox.Show(
+                "Are you sure you want to delete this user?\n\n" +
+                "This action cannot be undone.",
+
+                "Confirm Delete",
+
+                MessageBoxButtons.YesNo,
+
+                MessageBoxIcon.Warning
+            );
+
+
+            if (confirm != DialogResult.Yes)
             {
-                try
+                return;
+            }
+
+
+            try
+            {
+                using var context = new EstateNexusDbContext();
+
+                var user = context.Users.Find(userId);
+
+                if (user == null)
                 {
-                    using var context = new EstateNexusDbContext();
-                    var user = context.Users.Find(userId);
-                    if (user != null)
-                    {
-                        context.Users.Remove(user);
-                        context.SaveChanges();
-                        MessageBox.Show("User deleted successfully.");
-                        LoadUsers();
-                    }
+                    MessageBox.Show(
+                        "User not found."
+                    );
+
+                    return;
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error deleting user: " + ex.Message);
-                }
+
+
+                context.Users.Remove(user);
+
+                context.SaveChanges();
+
+
+                MessageBox.Show(
+                    "User deleted successfully."
+                );
+
+
+                LoadUsers();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Error deleting user.\n\n" +
+                    ex.Message,
+
+                    "Delete Error",
+
+                    MessageBoxButtons.OK,
+
+                    MessageBoxIcon.Error
+                );
             }
         }
+
+
+        // ==========================================
+        // DELETE PROPERTY
+        // ==========================================
 
         private void btnDeleteProperty_Click(object sender, EventArgs e)
         {
             if (dgvProperties.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Please select a property to remove.");
+                MessageBox.Show(
+                    "Please select a property to remove."
+                );
+
                 return;
             }
 
-            int propId = Convert.ToInt32(dgvProperties.SelectedRows[0].Cells["PropertyId"].Value);
 
-            DialogResult confirm = MessageBox.Show("Are you sure you want to remove this property?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (confirm == DialogResult.Yes)
+            int propertyId = Convert.ToInt32(
+                dgvProperties.SelectedRows[0]
+                    .Cells["PropertyId"]
+                    .Value
+            );
+
+
+            DialogResult confirm = MessageBox.Show(
+                "Are you sure you want to remove this property?",
+
+                "Confirm Remove",
+
+                MessageBoxButtons.YesNo,
+
+                MessageBoxIcon.Warning
+            );
+
+
+            if (confirm != DialogResult.Yes)
             {
-                try
+                return;
+            }
+
+
+            try
+            {
+                using var context = new EstateNexusDbContext();
+
+                var property = context.Properties.Find(propertyId);
+
+                if (property == null)
                 {
-                    using var context = new EstateNexusDbContext();
-                    var prop = context.Properties.Find(propId);
-                    if (prop != null)
-                    {
-                        context.Properties.Remove(prop);
-                        context.SaveChanges();
-                        MessageBox.Show("Property removed from platform.");
-                        LoadProperties();
-                    }
+                    MessageBox.Show(
+                        "Property not found."
+                    );
+
+                    return;
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error removing property: " + ex.Message);
-                }
+
+
+                context.Properties.Remove(property);
+
+                context.SaveChanges();
+
+
+                MessageBox.Show(
+                    "Property removed successfully."
+                );
+
+
+                LoadProperties();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Error removing property.\n\n" +
+                    ex.Message,
+
+                    "Remove Error",
+
+                    MessageBoxButtons.OK,
+
+                    MessageBoxIcon.Error
+                );
             }
         }
 
-        private void btnLogout_Click(object sender, EventArgs e)
+
+        // ==========================================
+        // LOGOUT
+        // ==========================================
+
+        private void btnLogout_Click(
+            object sender,
+            EventArgs e
+        )
         {
             Session.Logout();
-            LoginForm loginForm = new LoginForm();
+
+            LoginForm loginForm =
+                new LoginForm();
+
             loginForm.Show();
+
             this.Hide();
         }
 
-        protected override void OnFormClosed(FormClosedEventArgs e)
+
+        // ==========================================
+        // CLOSE APPLICATION
+        // ==========================================
+
+        protected override void OnFormClosed(
+            FormClosedEventArgs e
+        )
         {
+            base.OnFormClosed(e);
+
             Environment.Exit(0);
         }
     }
