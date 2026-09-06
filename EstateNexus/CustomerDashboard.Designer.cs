@@ -21,8 +21,19 @@ partial class CustomerDashboard
         this.tabBrowse = new System.Windows.Forms.TabPage();
         this.lblFilter = new System.Windows.Forms.Label();
         this.cmbListingTypeFilter = new System.Windows.Forms.ComboBox();
+        this.lblCategoryFilter = new System.Windows.Forms.Label();
+        this.cmbCategoryFilter = new System.Windows.Forms.ComboBox();
+        this.lblDistrictFilter = new System.Windows.Forms.Label();
+        this.cmbDistrictFilter = new System.Windows.Forms.ComboBox();
+        this.lblPriceFilter = new System.Windows.Forms.Label();
+        this.cmbPriceFilter = new System.Windows.Forms.ComboBox();
+        this.lblBedroomsFilter = new System.Windows.Forms.Label();
+        this.cmbBedroomsFilter = new System.Windows.Forms.ComboBox();
         this.txtSearch = new System.Windows.Forms.TextBox();
         this.btnSearch = new System.Windows.Forms.Button();
+        this.btnApplyFilters = new System.Windows.Forms.Button();
+        this.btnResetFilters = new System.Windows.Forms.Button();
+        this.lblResultCount = new System.Windows.Forms.Label();
         this.dgvBrowseProperties = new System.Windows.Forms.DataGridView();
         this.btnAddToCart = new System.Windows.Forms.Button();
         this.btnRequestVisit = new System.Windows.Forms.Button();
@@ -117,8 +128,19 @@ partial class CustomerDashboard
         // tabBrowse
         this.tabBrowse.Controls.Add(this.lblFilter);
         this.tabBrowse.Controls.Add(this.cmbListingTypeFilter);
+        this.tabBrowse.Controls.Add(this.lblCategoryFilter);
+        this.tabBrowse.Controls.Add(this.cmbCategoryFilter);
+        this.tabBrowse.Controls.Add(this.lblDistrictFilter);
+        this.tabBrowse.Controls.Add(this.cmbDistrictFilter);
+        this.tabBrowse.Controls.Add(this.lblPriceFilter);
+        this.tabBrowse.Controls.Add(this.cmbPriceFilter);
+        this.tabBrowse.Controls.Add(this.lblBedroomsFilter);
+        this.tabBrowse.Controls.Add(this.cmbBedroomsFilter);
         this.tabBrowse.Controls.Add(this.txtSearch);
         this.tabBrowse.Controls.Add(this.btnSearch);
+        this.tabBrowse.Controls.Add(this.btnApplyFilters);
+        this.tabBrowse.Controls.Add(this.btnResetFilters);
+        this.tabBrowse.Controls.Add(this.lblResultCount);
         this.tabBrowse.Controls.Add(this.dgvBrowseProperties);
         this.tabBrowse.Controls.Add(this.btnAddToCart);
         this.tabBrowse.Controls.Add(this.btnRequestVisit);
@@ -132,14 +154,14 @@ partial class CustomerDashboard
         this.tabBrowse.UseVisualStyleBackColor = true;
 
         // txtSearch
-        this.txtSearch.Location = new System.Drawing.Point(8, 10);
+        this.txtSearch.Location = new System.Drawing.Point(8, 8);
         this.txtSearch.Name = "txtSearch";
-        this.txtSearch.PlaceholderText = "Search by property title or location...";
-        this.txtSearch.Size = new System.Drawing.Size(300, 24);
+        this.txtSearch.PlaceholderText = "Search title/location...";
+        this.txtSearch.Size = new System.Drawing.Size(165, 24);
 
         // lblFilter
         this.lblFilter.AutoSize = true;
-        this.lblFilter.Location = new System.Drawing.Point(320, 13);
+        this.lblFilter.Location = new System.Drawing.Point(177, 11);
         this.lblFilter.Name = "lblFilter";
         this.lblFilter.Size = new System.Drawing.Size(38, 17);
         this.lblFilter.Text = "Type:";
@@ -148,28 +170,117 @@ partial class CustomerDashboard
         this.cmbListingTypeFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
         this.cmbListingTypeFilter.FormattingEnabled = true;
         this.cmbListingTypeFilter.Items.AddRange(new object[] { "All", "Sale", "Rent" });
-        this.cmbListingTypeFilter.Location = new System.Drawing.Point(365, 10);
+        this.cmbListingTypeFilter.Location = new System.Drawing.Point(217, 8);
         this.cmbListingTypeFilter.Name = "cmbListingTypeFilter";
-        this.cmbListingTypeFilter.Size = new System.Drawing.Size(100, 25);
+        this.cmbListingTypeFilter.Size = new System.Drawing.Size(65, 25);
+
+        // lblCategoryFilter
+        this.lblCategoryFilter.AutoSize = true;
+        this.lblCategoryFilter.Location = new System.Drawing.Point(286, 11);
+        this.lblCategoryFilter.Name = "lblCategoryFilter";
+        this.lblCategoryFilter.Size = new System.Drawing.Size(31, 17);
+        this.lblCategoryFilter.Text = "Cat:";
+
+        // cmbCategoryFilter
+        this.cmbCategoryFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbCategoryFilter.FormattingEnabled = true;
+        this.cmbCategoryFilter.Location = new System.Drawing.Point(320, 8);
+        this.cmbCategoryFilter.Name = "cmbCategoryFilter";
+        this.cmbCategoryFilter.Size = new System.Drawing.Size(105, 25);
+
+        // lblDistrictFilter
+        this.lblDistrictFilter.AutoSize = true;
+        this.lblDistrictFilter.Location = new System.Drawing.Point(430, 11);
+        this.lblDistrictFilter.Name = "lblDistrictFilter";
+        this.lblDistrictFilter.Size = new System.Drawing.Size(36, 17);
+        this.lblDistrictFilter.Text = "Dist:";
+
+        // cmbDistrictFilter
+        this.cmbDistrictFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbDistrictFilter.FormattingEnabled = true;
+        this.cmbDistrictFilter.Location = new System.Drawing.Point(468, 8);
+        this.cmbDistrictFilter.Name = "cmbDistrictFilter";
+        this.cmbDistrictFilter.Size = new System.Drawing.Size(95, 25);
+
+        // lblPriceFilter
+        this.lblPriceFilter.AutoSize = true;
+        this.lblPriceFilter.Location = new System.Drawing.Point(568, 11);
+        this.lblPriceFilter.Name = "lblPriceFilter";
+        this.lblPriceFilter.Size = new System.Drawing.Size(39, 17);
+        this.lblPriceFilter.Text = "Price:";
+
+        // cmbPriceFilter
+        this.cmbPriceFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbPriceFilter.FormattingEnabled = true;
+        this.cmbPriceFilter.Items.AddRange(new object[] {
+            "All",
+            "Under 20,000",
+            "20,000 - 50,000",
+            "50,000 - 1,00,000",
+            "1,00,000 - 50,00,000",
+            "Above 50,00,000"
+        });
+        this.cmbPriceFilter.Location = new System.Drawing.Point(610, 8);
+        this.cmbPriceFilter.Name = "cmbPriceFilter";
+        this.cmbPriceFilter.Size = new System.Drawing.Size(140, 25);
+
+        // lblBedroomsFilter
+        this.lblBedroomsFilter.AutoSize = true;
+        this.lblBedroomsFilter.Location = new System.Drawing.Point(755, 11);
+        this.lblBedroomsFilter.Name = "lblBedroomsFilter";
+        this.lblBedroomsFilter.Size = new System.Drawing.Size(40, 17);
+        this.lblBedroomsFilter.Text = "Beds:";
+
+        // cmbBedroomsFilter
+        this.cmbBedroomsFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbBedroomsFilter.FormattingEnabled = true;
+        this.cmbBedroomsFilter.Items.AddRange(new object[] { "All", "1", "2", "3", "4+" });
+        this.cmbBedroomsFilter.Location = new System.Drawing.Point(798, 8);
+        this.cmbBedroomsFilter.Name = "cmbBedroomsFilter";
+        this.cmbBedroomsFilter.Size = new System.Drawing.Size(55, 25);
+
+        // btnApplyFilters
+        this.btnApplyFilters.Location = new System.Drawing.Point(8, 38);
+        this.btnApplyFilters.Name = "btnApplyFilters";
+        this.btnApplyFilters.Size = new System.Drawing.Size(80, 27);
+        this.btnApplyFilters.Text = "Apply";
+        this.btnApplyFilters.UseVisualStyleBackColor = true;
+        this.btnApplyFilters.Click += new System.EventHandler(this.btnApplyFilters_Click);
+
+        // btnResetFilters
+        this.btnResetFilters.Location = new System.Drawing.Point(95, 38);
+        this.btnResetFilters.Name = "btnResetFilters";
+        this.btnResetFilters.Size = new System.Drawing.Size(80, 27);
+        this.btnResetFilters.Text = "Reset";
+        this.btnResetFilters.UseVisualStyleBackColor = true;
+        this.btnResetFilters.Click += new System.EventHandler(this.btnResetFilters_Click);
 
         // btnSearch
-        this.btnSearch.Location = new System.Drawing.Point(480, 9);
+        this.btnSearch.Location = new System.Drawing.Point(860, 7);
         this.btnSearch.Name = "btnSearch";
-        this.btnSearch.Size = new System.Drawing.Size(95, 27);
-        this.btnSearch.Text = "Search";
+        this.btnSearch.Size = new System.Drawing.Size(55, 27);
+        this.btnSearch.Text = "Go";
         this.btnSearch.UseVisualStyleBackColor = true;
         this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
+
+        // lblResultCount
+        this.lblResultCount.AutoSize = true;
+        this.lblResultCount.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.lblResultCount.Location = new System.Drawing.Point(190, 43);
+        this.lblResultCount.Name = "lblResultCount";
+        this.lblResultCount.Size = new System.Drawing.Size(125, 17);
+        this.lblResultCount.Text = "0 properties found";
 
         // dgvBrowseProperties
         this.dgvBrowseProperties.AllowUserToAddRows = false;
         this.dgvBrowseProperties.AllowUserToDeleteRows = false;
         this.dgvBrowseProperties.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        this.dgvBrowseProperties.Location = new System.Drawing.Point(8, 45);
+        this.dgvBrowseProperties.Location = new System.Drawing.Point(8, 70);
         this.dgvBrowseProperties.MultiSelect = false;
         this.dgvBrowseProperties.Name = "dgvBrowseProperties";
         this.dgvBrowseProperties.ReadOnly = true;
         this.dgvBrowseProperties.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-        this.dgvBrowseProperties.Size = new System.Drawing.Size(905, 365);
+        this.dgvBrowseProperties.Size = new System.Drawing.Size(905, 340);
 
         // btnAddToCart
         this.btnAddToCart.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
@@ -555,7 +666,18 @@ partial class CustomerDashboard
     private System.Windows.Forms.TextBox txtSearch;
     private System.Windows.Forms.Label lblFilter;
     private System.Windows.Forms.ComboBox cmbListingTypeFilter;
+    private System.Windows.Forms.Label lblCategoryFilter;
+    private System.Windows.Forms.ComboBox cmbCategoryFilter;
+    private System.Windows.Forms.Label lblDistrictFilter;
+    private System.Windows.Forms.ComboBox cmbDistrictFilter;
+    private System.Windows.Forms.Label lblPriceFilter;
+    private System.Windows.Forms.ComboBox cmbPriceFilter;
+    private System.Windows.Forms.Label lblBedroomsFilter;
+    private System.Windows.Forms.ComboBox cmbBedroomsFilter;
     private System.Windows.Forms.Button btnSearch;
+    private System.Windows.Forms.Button btnApplyFilters;
+    private System.Windows.Forms.Button btnResetFilters;
+    private System.Windows.Forms.Label lblResultCount;
     private System.Windows.Forms.DataGridView dgvBrowseProperties;
     private System.Windows.Forms.Button btnAddToCart;
     private System.Windows.Forms.Button btnRequestVisit;
