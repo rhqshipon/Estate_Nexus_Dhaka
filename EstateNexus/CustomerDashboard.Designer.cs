@@ -46,6 +46,7 @@ partial class CustomerDashboard
         this.cmbPaymentMethod = new System.Windows.Forms.ComboBox();
         this.tabOrders = new System.Windows.Forms.TabPage();
         this.dgvOrders = new System.Windows.Forms.DataGridView();
+        this.btnViewInvoice = new System.Windows.Forms.Button();
         this.tabMyVisits = new System.Windows.Forms.TabPage();
         this.dgvMyVisits = new System.Windows.Forms.DataGridView();
         this.btnRefreshVisits = new System.Windows.Forms.Button();
@@ -389,6 +390,7 @@ partial class CustomerDashboard
         this.lblCartTotal.Text = "Total Amount: ৳0.00";
 
         // tabOrders
+        this.tabOrders.Controls.Add(this.btnViewInvoice);
         this.tabOrders.Controls.Add(this.dgvOrders);
         this.tabOrders.Location = new System.Drawing.Point(4, 26);
         this.tabOrders.Name = "tabOrders";
@@ -401,12 +403,23 @@ partial class CustomerDashboard
         this.dgvOrders.AllowUserToAddRows = false;
         this.dgvOrders.AllowUserToDeleteRows = false;
         this.dgvOrders.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        this.dgvOrders.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.dgvOrders.Location = new System.Drawing.Point(3, 3);
+        this.dgvOrders.Location = new System.Drawing.Point(8, 8);
+        this.dgvOrders.MultiSelect = false;
         this.dgvOrders.Name = "dgvOrders";
         this.dgvOrders.ReadOnly = true;
         this.dgvOrders.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-        this.dgvOrders.Size = new System.Drawing.Size(916, 459);
+        this.dgvOrders.Size = new System.Drawing.Size(905, 400);
+        this.dgvOrders.SelectionChanged += new System.EventHandler(this.dgvOrders_SelectionChanged);
+
+        // btnViewInvoice
+        this.btnViewInvoice.Enabled = false;
+        this.btnViewInvoice.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.btnViewInvoice.Location = new System.Drawing.Point(8, 420);
+        this.btnViewInvoice.Name = "btnViewInvoice";
+        this.btnViewInvoice.Size = new System.Drawing.Size(150, 35);
+        this.btnViewInvoice.Text = "View Invoice";
+        this.btnViewInvoice.UseVisualStyleBackColor = true;
+        this.btnViewInvoice.Click += new System.EventHandler(this.btnViewInvoice_Click);
 
         // tabMyVisits
         this.tabMyVisits.Controls.Add(this.btnRefreshVisits);
@@ -717,6 +730,7 @@ partial class CustomerDashboard
     private System.Windows.Forms.Label lblCartTotal;
     private System.Windows.Forms.TabPage tabOrders;
     private System.Windows.Forms.DataGridView dgvOrders;
+    private System.Windows.Forms.Button btnViewInvoice;
     private System.Windows.Forms.TabPage tabMyVisits;
     private System.Windows.Forms.DataGridView dgvMyVisits;
     private System.Windows.Forms.Button btnRefreshVisits;

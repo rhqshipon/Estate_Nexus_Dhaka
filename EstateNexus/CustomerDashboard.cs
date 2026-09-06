@@ -699,10 +699,36 @@ namespace EstateNexus
                     .ToList();
 
                 dgvOrders.DataSource = orders;
+                btnViewInvoice.Enabled = dgvOrders.SelectedRows.Count > 0;
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error loading orders: " + ex.Message);
+            }
+        }
+
+        private void dgvOrders_SelectionChanged(object sender, EventArgs e)
+        {
+            btnViewInvoice.Enabled = dgvOrders.SelectedRows.Count > 0;
+        }
+
+        private void btnViewInvoice_Click(object sender, EventArgs e)
+        {
+            if (dgvOrders.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Please select an order from the list.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                int orderId = Convert.ToInt32(dgvOrders.SelectedRows[0].Cells["OrderId"].Value);
+                using var invoiceForm = new InvoiceForm(orderId);
+                invoiceForm.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error displaying invoice: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
