@@ -157,14 +157,7 @@ namespace EstateNexus
                         ProfileImagePath = null,
 
 
-                        // IMPORTANT:
-                        // Your SQL Server CHECK constraint does NOT allow
-                        // "Active".
-                        //
-                        // It currently allows "Pending" / "Suspended".
-                        //
-                        AccountStatus = "Pending",
-
+                        AccountStatus = (roleObj.RoleName == "Admin") ? "Pending" : "Active",
 
                         IsActive = true,
 
@@ -185,12 +178,24 @@ namespace EstateNexus
                     // Success Message
                     // ----------------------------------------------------
 
-                    MessageBox.Show(
-                        "Registration Successful!\n\nYou can now login using your email address and password.",
-                        "Success",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information
-                    );
+                    if (roleObj.RoleName == "Admin")
+                    {
+                        MessageBox.Show(
+                            "Registration Successful!\n\nYour seller account is pending Super Admin approval.",
+                            "Registration Pending",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information
+                        );
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                            "Registration Successful!\n\nYou can now login using your email address and password.",
+                            "Success",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information
+                        );
+                    }
 
 
                     // Go back to Login Form
