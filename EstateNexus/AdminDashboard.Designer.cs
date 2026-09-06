@@ -22,6 +22,7 @@ partial class AdminDashboard
         this.lblPropertyStats = new System.Windows.Forms.Label();
         this.btnMarkSold = new System.Windows.Forms.Button();
         this.btnDeleteProperty = new System.Windows.Forms.Button();
+        this.btnEditProperty = new System.Windows.Forms.Button();
         this.btnAddProperty = new System.Windows.Forms.Button();
         this.dgvMyProperties = new System.Windows.Forms.DataGridView();
         this.tabVisitRequests = new System.Windows.Forms.TabPage();
@@ -77,6 +78,7 @@ partial class AdminDashboard
         this.tabMyProperties.Controls.Add(this.lblPropertyStats);
         this.tabMyProperties.Controls.Add(this.btnMarkSold);
         this.tabMyProperties.Controls.Add(this.btnDeleteProperty);
+        this.tabMyProperties.Controls.Add(this.btnEditProperty);
         this.tabMyProperties.Controls.Add(this.btnAddProperty);
         this.tabMyProperties.Controls.Add(this.dgvMyProperties);
         this.tabMyProperties.Location = new System.Drawing.Point(4, 26);
@@ -90,21 +92,30 @@ partial class AdminDashboard
         this.btnAddProperty.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
         this.btnAddProperty.Location = new System.Drawing.Point(8, 8);
         this.btnAddProperty.Name = "btnAddProperty";
-        this.btnAddProperty.Size = new System.Drawing.Size(140, 32);
+        this.btnAddProperty.Size = new System.Drawing.Size(130, 32);
         this.btnAddProperty.Text = "+ Add Property";
         this.btnAddProperty.UseVisualStyleBackColor = true;
         this.btnAddProperty.Click += new System.EventHandler(this.btnAddProperty_Click);
 
+        // btnEditProperty
+        this.btnEditProperty.Location = new System.Drawing.Point(145, 8);
+        this.btnEditProperty.Name = "btnEditProperty";
+        this.btnEditProperty.Size = new System.Drawing.Size(120, 32);
+        this.btnEditProperty.Text = "Edit Selected";
+        this.btnEditProperty.UseVisualStyleBackColor = true;
+        this.btnEditProperty.Enabled = false;
+        this.btnEditProperty.Click += new System.EventHandler(this.btnEditProperty_Click);
+
         // btnDeleteProperty
-        this.btnDeleteProperty.Location = new System.Drawing.Point(160, 8);
+        this.btnDeleteProperty.Location = new System.Drawing.Point(272, 8);
         this.btnDeleteProperty.Name = "btnDeleteProperty";
-        this.btnDeleteProperty.Size = new System.Drawing.Size(140, 32);
+        this.btnDeleteProperty.Size = new System.Drawing.Size(125, 32);
         this.btnDeleteProperty.Text = "Delete Selected";
         this.btnDeleteProperty.UseVisualStyleBackColor = true;
         this.btnDeleteProperty.Click += new System.EventHandler(this.btnDeleteProperty_Click);
 
         // btnMarkSold
-        this.btnMarkSold.Location = new System.Drawing.Point(310, 8);
+        this.btnMarkSold.Location = new System.Drawing.Point(405, 8);
         this.btnMarkSold.Name = "btnMarkSold";
         this.btnMarkSold.Size = new System.Drawing.Size(160, 32);
         this.btnMarkSold.Text = "Toggle Sold/Available";
@@ -114,7 +125,7 @@ partial class AdminDashboard
         // lblPropertyStats
         this.lblPropertyStats.AutoSize = true;
         this.lblPropertyStats.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-        this.lblPropertyStats.Location = new System.Drawing.Point(500, 15);
+        this.lblPropertyStats.Location = new System.Drawing.Point(580, 15);
         this.lblPropertyStats.Name = "lblPropertyStats";
         this.lblPropertyStats.Size = new System.Drawing.Size(250, 19);
         this.lblPropertyStats.Text = "Total: 0 | Available: 0 | Sold: 0";
@@ -129,6 +140,7 @@ partial class AdminDashboard
         this.dgvMyProperties.ReadOnly = true;
         this.dgvMyProperties.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
         this.dgvMyProperties.Size = new System.Drawing.Size(905, 405);
+        this.dgvMyProperties.SelectionChanged += new System.EventHandler(this.dgvMyProperties_SelectionChanged);
 
         // tabVisitRequests
         this.tabVisitRequests.Controls.Add(this.lblVisitStats);
@@ -266,6 +278,7 @@ partial class AdminDashboard
     private System.Windows.Forms.TabPage tabMyProperties;
     private System.Windows.Forms.DataGridView dgvMyProperties;
     private System.Windows.Forms.Button btnAddProperty;
+    private System.Windows.Forms.Button btnEditProperty;
     private System.Windows.Forms.Button btnDeleteProperty;
     private System.Windows.Forms.Button btnMarkSold;
     private System.Windows.Forms.Label lblPropertyStats;
