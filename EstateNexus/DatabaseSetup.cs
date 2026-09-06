@@ -163,7 +163,10 @@ namespace EstateNexus
 
                         CONSTRAINT FK_Users_Roles
                         FOREIGN KEY (RoleId)
-                        REFERENCES Roles(RoleId)
+                        REFERENCES Roles(RoleId),
+
+                        CONSTRAINT CHK_Users_AccountStatus
+                        CHECK (AccountStatus IN ('Active', 'Pending', 'Suspended', 'Inactive', 'Approved', 'Rejected'))
                     );
                 END
 
@@ -1004,6 +1007,36 @@ namespace EstateNexus
                             ALTER TABLE Users
                             ADD CreatedDate DATETIME
                             NOT NULL DEFAULT GETDATE();
+                        END
+
+
+                        ------------------------------------------------
+                        -- ENSURE ACCOUNT STATUS CONSTRAINT
+                        ------------------------------------------------
+
+                        IF EXISTS
+                        (
+                            SELECT 1
+                            FROM sys.check_constraints
+                            WHERE parent_object_id = OBJECT_ID('Users')
+                            AND name = 'CHK_Users_AccountStatus'
+                            AND definition NOT LIKE '%Active%'
+                        )
+                        BEGIN
+                            ALTER TABLE Users DROP CONSTRAINT CHK_Users_AccountStatus;
+                            ALTER TABLE Users WITH CHECK ADD CONSTRAINT CHK_Users_AccountStatus
+                            CHECK (AccountStatus IN ('Active', 'Pending', 'Suspended', 'Inactive', 'Approved', 'Rejected'));
+                        END
+                        ELSE IF NOT EXISTS
+                        (
+                            SELECT 1
+                            FROM sys.check_constraints
+                            WHERE parent_object_id = OBJECT_ID('Users')
+                            AND name = 'CHK_Users_AccountStatus'
+                        )
+                        BEGIN
+                            ALTER TABLE Users WITH CHECK ADD CONSTRAINT CHK_Users_AccountStatus
+                            CHECK (AccountStatus IN ('Active', 'Pending', 'Suspended', 'Inactive', 'Approved', 'Rejected'));
                         END
 
 
