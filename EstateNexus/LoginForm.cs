@@ -19,9 +19,33 @@ namespace EstateNexus
             string input = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
-            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(password))
+            // Clear previous validation errors
+            errLogin.Clear();
+            lblLoginError.Text = string.Empty;
+
+            bool isUsernameEmpty = string.IsNullOrEmpty(input);
+            bool isPasswordEmpty = string.IsNullOrEmpty(password);
+
+            // Validate empty fields with inline indicators
+            if (isUsernameEmpty && isPasswordEmpty)
             {
-                MessageBox.Show("Please enter both email/username and password.");
+                errLogin.SetError(txtUsername, "Email or username is required.");
+                errLogin.SetError(txtPassword, "Password is required.");
+                lblLoginError.Text = "Please enter your email or username and password.";
+                return;
+            }
+
+            if (isUsernameEmpty)
+            {
+                errLogin.SetError(txtUsername, "Email or username is required.");
+                lblLoginError.Text = "Please enter your email or username.";
+                return;
+            }
+
+            if (isPasswordEmpty)
+            {
+                errLogin.SetError(txtPassword, "Password is required.");
+                lblLoginError.Text = "Please enter your password.";
                 return;
             }
 
@@ -120,6 +144,54 @@ namespace EstateNexus
             RegistrationForm regForm = new RegistrationForm();
             regForm.Show();
             this.Hide();
+        }
+
+        private void chkShowPassword_CheckedChanged(object sender, EventArgs e)
+        {
+            // Toggle between hidden ('*') and visible ('\0') password characters
+            txtPassword.PasswordChar = chkShowPassword.Checked ? '\0' : '*';
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            txtUsername.Clear();
+            txtPassword.Clear();
+            chkShowPassword.Checked = false;
+            errLogin.Clear();
+            lblLoginError.Text = string.Empty;
+            txtUsername.Focus();
+        }
+
+        private void txtUsername_TextChanged(object sender, EventArgs e)
+        {
+            // Clear error specifically on txtUsername
+            errLogin.SetError(txtUsername, string.Empty);
+
+            // Keep label accurate if password error is still pending
+            if (!string.IsNullOrEmpty(errLogin.GetError(txtPassword)))
+            {
+                lblLoginError.Text = "Please enter your password.";
+            }
+            else
+            {
+                lblLoginError.Text = string.Empty;
+            }
+        }
+
+        private void txtPassword_TextChanged(object sender, EventArgs e)
+        {
+            // Clear error specifically on txtPassword
+            errLogin.SetError(txtPassword, string.Empty);
+
+            // Keep label accurate if username error is still pending
+            if (!string.IsNullOrEmpty(errLogin.GetError(txtUsername)))
+            {
+                lblLoginError.Text = "Please enter your email or username.";
+            }
+            else
+            {
+                lblLoginError.Text = string.Empty;
+            }
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
