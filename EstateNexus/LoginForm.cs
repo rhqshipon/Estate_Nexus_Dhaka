@@ -42,9 +42,34 @@ namespace EstateNexus
                             return;
                         }
 
-                        if (user.AccountStatus == "Inactive" || !user.IsActive)
+                        // Normalize status
+                        string status = (user.AccountStatus ?? "").Trim();
+
+                        if (string.Equals(status, "Approved", StringComparison.OrdinalIgnoreCase))
                         {
-                            MessageBox.Show("Your account is inactive. Please contact admin.");
+                            status = "Active";
+                        }
+                        else if (string.Equals(status, "Rejected", StringComparison.OrdinalIgnoreCase) ||
+                                 string.Equals(status, "Inactive", StringComparison.OrdinalIgnoreCase))
+                        {
+                            status = "Suspended";
+                        }
+
+                        if (string.Equals(status, "Pending", StringComparison.OrdinalIgnoreCase))
+                        {
+                            MessageBox.Show("Your account is awaiting Super Admin approval.");
+                            return;
+                        }
+
+                        if (string.Equals(status, "Suspended", StringComparison.OrdinalIgnoreCase) || !user.IsActive)
+                        {
+                            MessageBox.Show("Your account has been suspended. Contact EstateNexus support.");
+                            return;
+                        }
+
+                        if (!string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase))
+                        {
+                            MessageBox.Show("Account is not active.");
                             return;
                         }
 
