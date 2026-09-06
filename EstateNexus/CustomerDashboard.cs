@@ -22,6 +22,10 @@ namespace EstateNexus
             InitializeBrowseFilters();
             ApplyBrowseFilters();
             LoadCart();
+            if (cmbPaymentMethod.Items.Count > 0 && cmbPaymentMethod.SelectedIndex < 0)
+            {
+                cmbPaymentMethod.SelectedIndex = 0;
+            }
             LoadOrders();
             LoadMyVisits();
             LoadReviews();
@@ -379,11 +383,18 @@ namespace EstateNexus
         {
             if (dgvCart.Rows.Count == 0)
             {
-                MessageBox.Show("Your cart is empty.");
+                MessageBox.Show("Your cart is empty.", "Cart Empty", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            DialogResult confirm = MessageBox.Show("Do you want to proceed with Checkout & Payment?", "Confirm Purchase", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            string selectedPaymentMethod = cmbPaymentMethod.SelectedItem?.ToString();
+            if (string.IsNullOrWhiteSpace(selectedPaymentMethod))
+            {
+                MessageBox.Show("Please select a payment method.", "Payment Method Required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            DialogResult confirm = MessageBox.Show($"Do you want to proceed with Checkout & Payment via {selectedPaymentMethod}?", "Confirm Purchase", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (confirm != DialogResult.Yes) return;
 
             try
@@ -399,7 +410,7 @@ namespace EstateNexus
 
                     if (cart == null || !cart.CartItems.Any())
                     {
-                        MessageBox.Show("Your cart is empty.");
+                        MessageBox.Show("Your cart is empty.", "Cart Empty", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
 
@@ -422,7 +433,7 @@ namespace EstateNexus
                     var payment = new Payment
                     {
                         OrderId = order.OrderId,
-                        PaymentMethod = "Online/Card",
+                        PaymentMethod = selectedPaymentMethod,
                         TransactionId = "TXN-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
                         PaymentAmount = totalAmount,
                         PaymentStatus = "Completed",
@@ -432,8 +443,7 @@ namespace EstateNexus
                     context.Payments.Add(payment);
                     context.SaveChanges(); // generates payment.PaymentId
 
-                    // 3. Create OrderItems from CartItems & Commissions
-                    decimal totalCommission = 0m;
+                    // 3. Create OrderItems from CartItems and update property status
                     foreach (var ci in cart.CartItems)
                     {
                         decimal itemFinal = ci.OfferedPrice ?? (ci.Property.ListingType == "Rent" ? ci.Property.Price * (ci.RentalMonths > 0 ? ci.RentalMonths : 1) : ci.Property.Price);
@@ -451,28 +461,27 @@ namespace EstateNexus
                         };
                         context.OrderItems.Add(orderItem);
 
-                        // Platform commission (5%)
-                        decimal commAmount = Math.Round(itemFinal * 0.05m, 2);
-                        decimal ownerAmount = itemFinal - commAmount;
-                        totalCommission += commAmount;
-
-                        var commission = new Commission
-                        {
-                            OrderId = order.OrderId,
-                            CommissionRate = 5.00m,
-                            TransactionAmount = itemFinal,
-                            CommissionAmount = commAmount,
-                            OwnerAmount = ownerAmount,
-                            CreatedDate = DateTime.Now
-                        };
-                        context.Commissions.Add(commission);
-
                         // Update Property status to Sold / Rented
                         ci.Property.PropertyStatus = ci.Property.ListingType == "Rent" ? "Rented" : "Sold";
                         ci.Property.UpdatedDate = DateTime.Now;
                     }
 
-                    // 4. Create Invoice linked to both OrderId and PaymentId
+                    // 4. Exactly ONE Commission per Order (5% platform commission)
+                    decimal commissionAmount = Math.Round(totalAmount * 0.05m, 2);
+                    decimal ownerAmount = totalAmount - commissionAmount;
+
+                    var commission = new Commission
+                    {
+                        OrderId = order.OrderId,
+                        CommissionRate = 5.00m,
+                        TransactionAmount = totalAmount,
+                        CommissionAmount = commissionAmount,
+                        OwnerAmount = ownerAmount,
+                        CreatedDate = DateTime.Now
+                    };
+                    context.Commissions.Add(commission);
+
+                    // 5. Create Invoice linked to both OrderId and PaymentId
                     var invoice = new Invoice
                     {
                         OrderId = order.OrderId,
@@ -480,27 +489,26 @@ namespace EstateNexus
                         InvoiceNumber = "INV-" + DateTime.Now.ToString("yyyyMMdd") + "-" + order.OrderId,
                         SubTotal = totalAmount,
                         DiscountAmount = 0m,
-                        CommissionAmount = totalCommission,
+                        CommissionAmount = commissionAmount,
                         TotalAmount = totalAmount,
                         GeneratedDate = DateTime.Now
                     };
                     context.Invoices.Add(invoice);
 
-                    // 5. Clear Cart Items
+                    // 6. Cart Finalization: clear items and deactivate cart
                     context.CartItems.RemoveRange(cart.CartItems);
+                    cart.IsActive = false;
 
                     context.SaveChanges();
                     transaction.Commit();
 
-                    MessageBox.Show(
-                        $"Checkout Successful!\nOrder ID: #{order.OrderId}\nTransaction ID: {payment.TransactionId}\nInvoice Number: {invoice.InvoiceNumber}\nTotal Amount Paid: ৳{totalAmount:N2}",
-                        "Invoice / Purchase Receipt",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-
                     LoadCart();
                     LoadOrders();
                     LoadBrowseProperties("", cmbListingTypeFilter.SelectedItem?.ToString() ?? "All");
+
+                    // Open printable invoice modal dialog
+                    using var invoiceForm = new InvoiceForm(order.OrderId);
+                    invoiceForm.ShowDialog(this);
                 }
                 catch (Exception ex)
                 {

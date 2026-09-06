@@ -42,6 +42,8 @@ partial class CustomerDashboard
         this.btnRemoveFromCart = new System.Windows.Forms.Button();
         this.dgvCart = new System.Windows.Forms.DataGridView();
         this.btnCheckout = new System.Windows.Forms.Button();
+        this.lblPaymentMethod = new System.Windows.Forms.Label();
+        this.cmbPaymentMethod = new System.Windows.Forms.ComboBox();
         this.tabOrders = new System.Windows.Forms.TabPage();
         this.dgvOrders = new System.Windows.Forms.DataGridView();
         this.tabMyVisits = new System.Windows.Forms.TabPage();
@@ -316,6 +318,8 @@ partial class CustomerDashboard
 
         // tabCart
         this.tabCart.Controls.Add(this.lblCartTotal);
+        this.tabCart.Controls.Add(this.lblPaymentMethod);
+        this.tabCart.Controls.Add(this.cmbPaymentMethod);
         this.tabCart.Controls.Add(this.btnRemoveFromCart);
         this.tabCart.Controls.Add(this.dgvCart);
         this.tabCart.Controls.Add(this.btnCheckout);
@@ -340,27 +344,48 @@ partial class CustomerDashboard
         // btnRemoveFromCart
         this.btnRemoveFromCart.Location = new System.Drawing.Point(8, 420);
         this.btnRemoveFromCart.Name = "btnRemoveFromCart";
-        this.btnRemoveFromCart.Size = new System.Drawing.Size(150, 35);
+        this.btnRemoveFromCart.Size = new System.Drawing.Size(125, 35);
         this.btnRemoveFromCart.Text = "Remove Item";
         this.btnRemoveFromCart.UseVisualStyleBackColor = true;
         this.btnRemoveFromCart.Click += new System.EventHandler(this.btnRemoveFromCart_Click);
 
+        // lblPaymentMethod
+        this.lblPaymentMethod.AutoSize = true;
+        this.lblPaymentMethod.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.lblPaymentMethod.Location = new System.Drawing.Point(145, 428);
+        this.lblPaymentMethod.Name = "lblPaymentMethod";
+        this.lblPaymentMethod.Size = new System.Drawing.Size(117, 17);
+        this.lblPaymentMethod.Text = "Payment Method:";
+
+        // cmbPaymentMethod
+        this.cmbPaymentMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbPaymentMethod.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+        this.cmbPaymentMethod.FormattingEnabled = true;
+        this.cmbPaymentMethod.Items.AddRange(new object[] {
+            "Card",
+            "bKash",
+            "Nagad",
+            "Bank Transfer"});
+        this.cmbPaymentMethod.Location = new System.Drawing.Point(268, 425);
+        this.cmbPaymentMethod.Name = "cmbPaymentMethod";
+        this.cmbPaymentMethod.Size = new System.Drawing.Size(130, 25);
+
         // btnCheckout
         this.btnCheckout.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-        this.btnCheckout.Location = new System.Drawing.Point(170, 420);
+        this.btnCheckout.Location = new System.Drawing.Point(410, 420);
         this.btnCheckout.Name = "btnCheckout";
-        this.btnCheckout.Size = new System.Drawing.Size(190, 35);
+        this.btnCheckout.Size = new System.Drawing.Size(175, 35);
         this.btnCheckout.Text = "Proceed to Checkout";
         this.btnCheckout.UseVisualStyleBackColor = true;
         this.btnCheckout.Click += new System.EventHandler(this.btnCheckout_Click);
 
         // lblCartTotal
         this.lblCartTotal.AutoSize = true;
-        this.lblCartTotal.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+        this.lblCartTotal.Font = new System.Drawing.Font("Segoe UI", 11.5F, System.Drawing.FontStyle.Bold);
         this.lblCartTotal.ForeColor = System.Drawing.Color.DarkGreen;
-        this.lblCartTotal.Location = new System.Drawing.Point(450, 426);
+        this.lblCartTotal.Location = new System.Drawing.Point(600, 427);
         this.lblCartTotal.Name = "lblCartTotal";
-        this.lblCartTotal.Size = new System.Drawing.Size(171, 21);
+        this.lblCartTotal.Size = new System.Drawing.Size(163, 21);
         this.lblCartTotal.Text = "Total Amount: ৳0.00";
 
         // tabOrders
@@ -687,6 +712,8 @@ partial class CustomerDashboard
     private System.Windows.Forms.DataGridView dgvCart;
     private System.Windows.Forms.Button btnRemoveFromCart;
     private System.Windows.Forms.Button btnCheckout;
+    private System.Windows.Forms.Label lblPaymentMethod;
+    private System.Windows.Forms.ComboBox cmbPaymentMethod;
     private System.Windows.Forms.Label lblCartTotal;
     private System.Windows.Forms.TabPage tabOrders;
     private System.Windows.Forms.DataGridView dgvOrders;
