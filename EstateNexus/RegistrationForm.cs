@@ -19,59 +19,101 @@ namespace EstateNexus
 
         private void btnRegister_Click(object sender, EventArgs e)
         {
+            // Clear previous errors
+            errRegistration.Clear();
+            lblRegError.Text = string.Empty;
+
             // Get values from the form
             string name = txtName.Text.Trim();
-
-            // Username is intentionally ignored.
-            // EstateNexus database does not have a Username column.
             string email = txtEmail.Text.Trim();
             string phone = txtPhone.Text.Trim();
-            string password = txtPassword.Text.Trim();
+            string password = txtPassword.Text;
+            string confirmPassword = txtConfirmPassword.Text;
 
             string role = cmbRole.SelectedItem?.ToString()?.Trim() ?? "Customer";
-
 
             // ============================================================
             // 1. REQUIRED FIELD VALIDATION
             // ============================================================
-
-            if (string.IsNullOrWhiteSpace(name) ||
-                string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(name))
             {
-                MessageBox.Show(
-                    "Please fill in Full Name, Email, and Password.",
-                    "Missing Information",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
-
+                errRegistration.SetError(txtName, "Full Name is required.");
+                lblRegError.Text = "Please enter your Full Name.";
+                txtName.Focus();
                 return;
             }
 
-
-            // ============================================================
-            // 2. EMAIL VALIDATION
-            // ============================================================
-
-            if (!IsValidEmail(email))
+            if (string.IsNullOrWhiteSpace(email))
             {
-                MessageBox.Show(
-                    "Please enter a valid email address.",
-                    "Invalid Email",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
-
+                errRegistration.SetError(txtEmail, "Email is required.");
+                lblRegError.Text = "Please enter your Email address.";
                 txtEmail.Focus();
                 return;
             }
 
+            if (string.IsNullOrEmpty(password))
+            {
+                errRegistration.SetError(txtPassword, "Password is required.");
+                lblRegError.Text = "Please enter your Password.";
+                txtPassword.Focus();
+                return;
+            }
+
+            if (string.IsNullOrEmpty(confirmPassword))
+            {
+                errRegistration.SetError(txtConfirmPassword, "Please confirm your password.");
+                lblRegError.Text = "Please confirm your password.";
+                txtConfirmPassword.Focus();
+                return;
+            }
 
             // ============================================================
-            // 3. DATABASE REGISTRATION
+            // 2. EMAIL VALIDATION
             // ============================================================
+            if (!IsValidEmail(email))
+            {
+                errRegistration.SetError(txtEmail, "Invalid email address format.");
+                lblRegError.Text = "Please enter a valid email address.";
+                txtEmail.Focus();
+                return;
+            }
 
+            // ============================================================
+            // 3. PHONE VALIDATION (If provided)
+            // ============================================================
+            if (!string.IsNullOrWhiteSpace(phone) && !Regex.IsMatch(phone, @"^[0-9+\-\s()]{7,20}$"))
+            {
+                errRegistration.SetError(txtPhone, "Please enter a valid phone number.");
+                lblRegError.Text = "Please enter a valid phone number.";
+                txtPhone.Focus();
+                return;
+            }
+
+            // ============================================================
+            // 4. PASSWORD STRENGTH VALIDATION
+            // ============================================================
+            if (password.Length < 6)
+            {
+                errRegistration.SetError(txtPassword, "Password must be at least 6 characters.");
+                lblRegError.Text = "Password must be at least 6 characters long.";
+                txtPassword.Focus();
+                return;
+            }
+
+            // ============================================================
+            // 5. CONFIRM PASSWORD MATCHING
+            // ============================================================
+            if (password != confirmPassword)
+            {
+                errRegistration.SetError(txtConfirmPassword, "Passwords do not match.");
+                lblRegError.Text = "Passwords do not match.";
+                txtConfirmPassword.Focus();
+                return;
+            }
+
+            // ============================================================
+            // 6. DATABASE REGISTRATION
+            // ============================================================
             try
             {
                 using (var context = new EstateNexusDbContext())
@@ -79,19 +121,13 @@ namespace EstateNexus
                     // ----------------------------------------------------
                     // Check if email already exists
                     // ----------------------------------------------------
-
                     bool emailExists = context.Users
                         .Any(u => u.Email == email);
 
                     if (emailExists)
                     {
-                        MessageBox.Show(
-                            "This email is already registered. Please use a different email.",
-                            "Duplicate Email",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning
-                        );
-
+                        errRegistration.SetError(txtEmail, "This email is already registered.");
+                        lblRegError.Text = "This email is already registered. Please use a different email.";
                         txtEmail.Focus();
                         return;
                     }
@@ -157,14 +193,7 @@ namespace EstateNexus
                         ProfileImagePath = null,
 
 
-                        // IMPORTANT:
-                        // Your SQL Server CHECK constraint does NOT allow
-                        // "Active".
-                        //
-                        // It currently allows "Pending" / "Suspended".
-                        //
-                        AccountStatus = "Pending",
-
+                        AccountStatus = (roleObj.RoleName == "Admin") ? "Pending" : "Active",
 
                         IsActive = true,
 
@@ -185,12 +214,24 @@ namespace EstateNexus
                     // Success Message
                     // ----------------------------------------------------
 
-                    MessageBox.Show(
-                        "Registration Successful!\n\nYou can now login using your email address and password.",
-                        "Success",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information
-                    );
+                    if (roleObj.RoleName == "Admin")
+                    {
+                        MessageBox.Show(
+                            "Registration Successful!\n\nYour seller account is pending Super Admin approval.",
+                            "Registration Pending",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information
+                        );
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                            "Registration Successful!\n\nYou can now login using your email address and password.",
+                            "Success",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information
+                        );
+                    }
 
 
                     // Go back to Login Form

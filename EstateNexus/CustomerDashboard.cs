@@ -19,16 +19,94 @@ namespace EstateNexus
         private void CustomerDashboard_Load(object sender, EventArgs e)
         {
             lblTitle.Text = "Customer Dashboard - Welcome, " + Session.FullName;
-            cmbListingTypeFilter.SelectedIndex = 0;
-            LoadBrowseProperties("", "All");
+            InitializeBrowseFilters();
+            ApplyBrowseFilters();
             LoadCart();
+            if (cmbPaymentMethod.Items.Count > 0 && cmbPaymentMethod.SelectedIndex < 0)
+            {
+                cmbPaymentMethod.SelectedIndex = 0;
+            }
             LoadOrders();
             LoadMyVisits();
             LoadReviews();
             LoadUserProfile();
         }
 
-        private void LoadBrowseProperties(string searchTerm, string typeFilter)
+        private void InitializeBrowseFilters()
+        {
+            try
+            {
+                using var context = new EstateNexusDbContext();
+
+                // Category filter
+                cmbCategoryFilter.Items.Clear();
+                cmbCategoryFilter.Items.Add("All");
+                var categories = context.PropertyCategories
+                    .Where(c => c.IsActive)
+                    .OrderBy(c => c.CategoryName)
+                    .Select(c => c.CategoryName)
+                    .ToList();
+                foreach (var cat in categories)
+                {
+                    cmbCategoryFilter.Items.Add(cat);
+                }
+                cmbCategoryFilter.SelectedIndex = 0;
+
+                // District filter
+                cmbDistrictFilter.Items.Clear();
+                cmbDistrictFilter.Items.Add("All");
+                var districts = context.Properties
+                    .Where(p => !string.IsNullOrEmpty(p.District))
+                    .Select(p => p.District)
+                    .Distinct()
+                    .OrderBy(d => d)
+                    .ToList();
+                foreach (var dist in districts)
+                {
+                    cmbDistrictFilter.Items.Add(dist);
+                }
+                cmbDistrictFilter.SelectedIndex = 0;
+
+                // Listing Type filter
+                if (cmbListingTypeFilter.SelectedIndex < 0 && cmbListingTypeFilter.Items.Count > 0)
+                    cmbListingTypeFilter.SelectedIndex = 0;
+
+                // Price filter
+                if (cmbPriceFilter.SelectedIndex < 0 && cmbPriceFilter.Items.Count > 0)
+                    cmbPriceFilter.SelectedIndex = 0;
+
+                // Bedrooms filter
+                if (cmbBedroomsFilter.SelectedIndex < 0 && cmbBedroomsFilter.Items.Count > 0)
+                    cmbBedroomsFilter.SelectedIndex = 0;
+            }
+            catch
+            {
+                if (cmbListingTypeFilter.SelectedIndex < 0 && cmbListingTypeFilter.Items.Count > 0)
+                    cmbListingTypeFilter.SelectedIndex = 0;
+                if (cmbCategoryFilter.SelectedIndex < 0 && cmbCategoryFilter.Items.Count > 0)
+                    cmbCategoryFilter.SelectedIndex = 0;
+                if (cmbDistrictFilter.SelectedIndex < 0 && cmbDistrictFilter.Items.Count > 0)
+                    cmbDistrictFilter.SelectedIndex = 0;
+                if (cmbPriceFilter.SelectedIndex < 0 && cmbPriceFilter.Items.Count > 0)
+                    cmbPriceFilter.SelectedIndex = 0;
+                if (cmbBedroomsFilter.SelectedIndex < 0 && cmbBedroomsFilter.Items.Count > 0)
+                    cmbBedroomsFilter.SelectedIndex = 0;
+            }
+        }
+
+        private void ApplyBrowseFilters()
+        {
+            string search = txtSearch.Text.Trim();
+            string listingType = cmbListingTypeFilter.SelectedItem?.ToString() ?? "All";
+            string category = cmbCategoryFilter.SelectedItem?.ToString() ?? "All";
+            string district = cmbDistrictFilter.SelectedItem?.ToString() ?? "All";
+            string priceRange = cmbPriceFilter.SelectedItem?.ToString() ?? "All";
+            string bedrooms = cmbBedroomsFilter.SelectedItem?.ToString() ?? "All";
+
+            LoadBrowseProperties(search, listingType, category, district, priceRange, bedrooms);
+        }
+
+        private void LoadBrowseProperties(string searchTerm, string typeFilter, string categoryFilter = "All", string districtFilter = "All", string priceFilter = "All", string bedroomsFilter = "All")
         {
             try
             {
@@ -36,8 +114,9 @@ namespace EstateNexus
                 var query = context.Properties
                     .Include(p => p.Category)
                     .Include(p => p.Owner)
-                    .Where(p => p.PropertyStatus == "Available");
+                    .Where(p => p.ApprovalStatus == "Approved" && p.PropertyStatus == "Available");
 
+                // Keyword search
                 if (!string.IsNullOrWhiteSpace(searchTerm))
                 {
                     query = query.Where(p => p.PropertyTitle.Contains(searchTerm) ||
@@ -45,10 +124,66 @@ namespace EstateNexus
                                              p.AreaLocation.Contains(searchTerm));
                 }
 
-                if (typeFilter != "All")
+                // Listing Type filter
+                if (typeFilter != "All" && !string.IsNullOrEmpty(typeFilter))
                 {
                     query = query.Where(p => p.ListingType == typeFilter);
                 }
+
+                // Category filter
+                if (categoryFilter != "All" && !string.IsNullOrEmpty(categoryFilter))
+                {
+                    query = query.Where(p => p.Category != null && p.Category.CategoryName == categoryFilter);
+                }
+
+                // District filter
+                if (districtFilter != "All" && !string.IsNullOrEmpty(districtFilter))
+                {
+                    query = query.Where(p => p.District == districtFilter);
+                }
+
+                // Price range filter
+                if (priceFilter == "Under 20,000")
+                {
+                    query = query.Where(p => p.Price < 20000);
+                }
+                else if (priceFilter == "20,000 - 50,000")
+                {
+                    query = query.Where(p => p.Price >= 20000 && p.Price <= 50000);
+                }
+                else if (priceFilter == "50,000 - 1,00,000")
+                {
+                    query = query.Where(p => p.Price > 50000 && p.Price <= 100000);
+                }
+                else if (priceFilter == "1,00,000 - 50,00,000")
+                {
+                    query = query.Where(p => p.Price > 100000 && p.Price <= 5000000);
+                }
+                else if (priceFilter == "Above 50,00,000")
+                {
+                    query = query.Where(p => p.Price > 5000000);
+                }
+
+                // Bedrooms filter
+                if (bedroomsFilter == "1")
+                {
+                    query = query.Where(p => p.Bedrooms == 1);
+                }
+                else if (bedroomsFilter == "2")
+                {
+                    query = query.Where(p => p.Bedrooms == 2);
+                }
+                else if (bedroomsFilter == "3")
+                {
+                    query = query.Where(p => p.Bedrooms == 3);
+                }
+                else if (bedroomsFilter == "4+")
+                {
+                    query = query.Where(p => p.Bedrooms >= 4);
+                }
+
+                // Order: Featured first, then newest CreatedDate first
+                query = query.OrderByDescending(p => p.IsFeatured).ThenByDescending(p => p.CreatedDate);
 
                 var list = query.Select(p => new
                 {
@@ -68,6 +203,7 @@ namespace EstateNexus
                 }).ToList();
 
                 dgvBrowseProperties.DataSource = list;
+                lblResultCount.Text = $"{list.Count} properties found";
             }
             catch (Exception ex)
             {
@@ -77,9 +213,29 @@ namespace EstateNexus
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            string term = txtSearch.Text.Trim();
-            string type = cmbListingTypeFilter.SelectedItem?.ToString() ?? "All";
-            LoadBrowseProperties(term, type);
+            ApplyBrowseFilters();
+        }
+
+        private void btnApplyFilters_Click(object sender, EventArgs e)
+        {
+            ApplyBrowseFilters();
+        }
+
+        private void btnResetFilters_Click(object sender, EventArgs e)
+        {
+            txtSearch.Text = string.Empty;
+            if (cmbListingTypeFilter.Items.Count > 0)
+                cmbListingTypeFilter.SelectedIndex = 0;
+            if (cmbCategoryFilter.Items.Count > 0)
+                cmbCategoryFilter.SelectedIndex = 0;
+            if (cmbDistrictFilter.Items.Count > 0)
+                cmbDistrictFilter.SelectedIndex = 0;
+            if (cmbPriceFilter.Items.Count > 0)
+                cmbPriceFilter.SelectedIndex = 0;
+            if (cmbBedroomsFilter.Items.Count > 0)
+                cmbBedroomsFilter.SelectedIndex = 0;
+
+            ApplyBrowseFilters();
         }
 
         private void LoadCart()
@@ -227,11 +383,18 @@ namespace EstateNexus
         {
             if (dgvCart.Rows.Count == 0)
             {
-                MessageBox.Show("Your cart is empty.");
+                MessageBox.Show("Your cart is empty.", "Cart Empty", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            DialogResult confirm = MessageBox.Show("Do you want to proceed with Checkout & Payment?", "Confirm Purchase", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            string selectedPaymentMethod = cmbPaymentMethod.SelectedItem?.ToString();
+            if (string.IsNullOrWhiteSpace(selectedPaymentMethod))
+            {
+                MessageBox.Show("Please select a payment method.", "Payment Method Required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            DialogResult confirm = MessageBox.Show($"Do you want to proceed with Checkout & Payment via {selectedPaymentMethod}?", "Confirm Purchase", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (confirm != DialogResult.Yes) return;
 
             try
@@ -247,7 +410,7 @@ namespace EstateNexus
 
                     if (cart == null || !cart.CartItems.Any())
                     {
-                        MessageBox.Show("Your cart is empty.");
+                        MessageBox.Show("Your cart is empty.", "Cart Empty", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
 
@@ -270,7 +433,7 @@ namespace EstateNexus
                     var payment = new Payment
                     {
                         OrderId = order.OrderId,
-                        PaymentMethod = "Online/Card",
+                        PaymentMethod = selectedPaymentMethod,
                         TransactionId = "TXN-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
                         PaymentAmount = totalAmount,
                         PaymentStatus = "Completed",
@@ -280,8 +443,7 @@ namespace EstateNexus
                     context.Payments.Add(payment);
                     context.SaveChanges(); // generates payment.PaymentId
 
-                    // 3. Create OrderItems from CartItems & Commissions
-                    decimal totalCommission = 0m;
+                    // 3. Create OrderItems from CartItems and update property status
                     foreach (var ci in cart.CartItems)
                     {
                         decimal itemFinal = ci.OfferedPrice ?? (ci.Property.ListingType == "Rent" ? ci.Property.Price * (ci.RentalMonths > 0 ? ci.RentalMonths : 1) : ci.Property.Price);
@@ -299,28 +461,27 @@ namespace EstateNexus
                         };
                         context.OrderItems.Add(orderItem);
 
-                        // Platform commission (5%)
-                        decimal commAmount = Math.Round(itemFinal * 0.05m, 2);
-                        decimal ownerAmount = itemFinal - commAmount;
-                        totalCommission += commAmount;
-
-                        var commission = new Commission
-                        {
-                            OrderId = order.OrderId,
-                            CommissionRate = 5.00m,
-                            TransactionAmount = itemFinal,
-                            CommissionAmount = commAmount,
-                            OwnerAmount = ownerAmount,
-                            CreatedDate = DateTime.Now
-                        };
-                        context.Commissions.Add(commission);
-
                         // Update Property status to Sold / Rented
                         ci.Property.PropertyStatus = ci.Property.ListingType == "Rent" ? "Rented" : "Sold";
                         ci.Property.UpdatedDate = DateTime.Now;
                     }
 
-                    // 4. Create Invoice linked to both OrderId and PaymentId
+                    // 4. Exactly ONE Commission per Order (5% platform commission)
+                    decimal commissionAmount = Math.Round(totalAmount * 0.05m, 2);
+                    decimal ownerAmount = totalAmount - commissionAmount;
+
+                    var commission = new Commission
+                    {
+                        OrderId = order.OrderId,
+                        CommissionRate = 5.00m,
+                        TransactionAmount = totalAmount,
+                        CommissionAmount = commissionAmount,
+                        OwnerAmount = ownerAmount,
+                        CreatedDate = DateTime.Now
+                    };
+                    context.Commissions.Add(commission);
+
+                    // 5. Create Invoice linked to both OrderId and PaymentId
                     var invoice = new Invoice
                     {
                         OrderId = order.OrderId,
@@ -328,27 +489,26 @@ namespace EstateNexus
                         InvoiceNumber = "INV-" + DateTime.Now.ToString("yyyyMMdd") + "-" + order.OrderId,
                         SubTotal = totalAmount,
                         DiscountAmount = 0m,
-                        CommissionAmount = totalCommission,
+                        CommissionAmount = commissionAmount,
                         TotalAmount = totalAmount,
                         GeneratedDate = DateTime.Now
                     };
                     context.Invoices.Add(invoice);
 
-                    // 5. Clear Cart Items
+                    // 6. Cart Finalization: clear items and deactivate cart
                     context.CartItems.RemoveRange(cart.CartItems);
+                    cart.IsActive = false;
 
                     context.SaveChanges();
                     transaction.Commit();
 
-                    MessageBox.Show(
-                        $"Checkout Successful!\nOrder ID: #{order.OrderId}\nTransaction ID: {payment.TransactionId}\nInvoice Number: {invoice.InvoiceNumber}\nTotal Amount Paid: ৳{totalAmount:N2}",
-                        "Invoice / Purchase Receipt",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-
                     LoadCart();
                     LoadOrders();
                     LoadBrowseProperties("", cmbListingTypeFilter.SelectedItem?.ToString() ?? "All");
+
+                    // Open printable invoice modal dialog
+                    using var invoiceForm = new InvoiceForm(order.OrderId);
+                    invoiceForm.ShowDialog(this);
                 }
                 catch (Exception ex)
                 {
@@ -539,10 +699,36 @@ namespace EstateNexus
                     .ToList();
 
                 dgvOrders.DataSource = orders;
+                btnViewInvoice.Enabled = dgvOrders.SelectedRows.Count > 0;
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error loading orders: " + ex.Message);
+            }
+        }
+
+        private void dgvOrders_SelectionChanged(object sender, EventArgs e)
+        {
+            btnViewInvoice.Enabled = dgvOrders.SelectedRows.Count > 0;
+        }
+
+        private void btnViewInvoice_Click(object sender, EventArgs e)
+        {
+            if (dgvOrders.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Please select an order from the list.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                int orderId = Convert.ToInt32(dgvOrders.SelectedRows[0].Cells["OrderId"].Value);
+                using var invoiceForm = new InvoiceForm(orderId);
+                invoiceForm.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error displaying invoice: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

@@ -21,8 +21,19 @@ partial class CustomerDashboard
         this.tabBrowse = new System.Windows.Forms.TabPage();
         this.lblFilter = new System.Windows.Forms.Label();
         this.cmbListingTypeFilter = new System.Windows.Forms.ComboBox();
+        this.lblCategoryFilter = new System.Windows.Forms.Label();
+        this.cmbCategoryFilter = new System.Windows.Forms.ComboBox();
+        this.lblDistrictFilter = new System.Windows.Forms.Label();
+        this.cmbDistrictFilter = new System.Windows.Forms.ComboBox();
+        this.lblPriceFilter = new System.Windows.Forms.Label();
+        this.cmbPriceFilter = new System.Windows.Forms.ComboBox();
+        this.lblBedroomsFilter = new System.Windows.Forms.Label();
+        this.cmbBedroomsFilter = new System.Windows.Forms.ComboBox();
         this.txtSearch = new System.Windows.Forms.TextBox();
         this.btnSearch = new System.Windows.Forms.Button();
+        this.btnApplyFilters = new System.Windows.Forms.Button();
+        this.btnResetFilters = new System.Windows.Forms.Button();
+        this.lblResultCount = new System.Windows.Forms.Label();
         this.dgvBrowseProperties = new System.Windows.Forms.DataGridView();
         this.btnAddToCart = new System.Windows.Forms.Button();
         this.btnRequestVisit = new System.Windows.Forms.Button();
@@ -31,8 +42,11 @@ partial class CustomerDashboard
         this.btnRemoveFromCart = new System.Windows.Forms.Button();
         this.dgvCart = new System.Windows.Forms.DataGridView();
         this.btnCheckout = new System.Windows.Forms.Button();
+        this.lblPaymentMethod = new System.Windows.Forms.Label();
+        this.cmbPaymentMethod = new System.Windows.Forms.ComboBox();
         this.tabOrders = new System.Windows.Forms.TabPage();
         this.dgvOrders = new System.Windows.Forms.DataGridView();
+        this.btnViewInvoice = new System.Windows.Forms.Button();
         this.tabMyVisits = new System.Windows.Forms.TabPage();
         this.dgvMyVisits = new System.Windows.Forms.DataGridView();
         this.btnRefreshVisits = new System.Windows.Forms.Button();
@@ -117,8 +131,19 @@ partial class CustomerDashboard
         // tabBrowse
         this.tabBrowse.Controls.Add(this.lblFilter);
         this.tabBrowse.Controls.Add(this.cmbListingTypeFilter);
+        this.tabBrowse.Controls.Add(this.lblCategoryFilter);
+        this.tabBrowse.Controls.Add(this.cmbCategoryFilter);
+        this.tabBrowse.Controls.Add(this.lblDistrictFilter);
+        this.tabBrowse.Controls.Add(this.cmbDistrictFilter);
+        this.tabBrowse.Controls.Add(this.lblPriceFilter);
+        this.tabBrowse.Controls.Add(this.cmbPriceFilter);
+        this.tabBrowse.Controls.Add(this.lblBedroomsFilter);
+        this.tabBrowse.Controls.Add(this.cmbBedroomsFilter);
         this.tabBrowse.Controls.Add(this.txtSearch);
         this.tabBrowse.Controls.Add(this.btnSearch);
+        this.tabBrowse.Controls.Add(this.btnApplyFilters);
+        this.tabBrowse.Controls.Add(this.btnResetFilters);
+        this.tabBrowse.Controls.Add(this.lblResultCount);
         this.tabBrowse.Controls.Add(this.dgvBrowseProperties);
         this.tabBrowse.Controls.Add(this.btnAddToCart);
         this.tabBrowse.Controls.Add(this.btnRequestVisit);
@@ -132,14 +157,14 @@ partial class CustomerDashboard
         this.tabBrowse.UseVisualStyleBackColor = true;
 
         // txtSearch
-        this.txtSearch.Location = new System.Drawing.Point(8, 10);
+        this.txtSearch.Location = new System.Drawing.Point(8, 8);
         this.txtSearch.Name = "txtSearch";
-        this.txtSearch.PlaceholderText = "Search by property title or location...";
-        this.txtSearch.Size = new System.Drawing.Size(300, 24);
+        this.txtSearch.PlaceholderText = "Search title/location...";
+        this.txtSearch.Size = new System.Drawing.Size(165, 24);
 
         // lblFilter
         this.lblFilter.AutoSize = true;
-        this.lblFilter.Location = new System.Drawing.Point(320, 13);
+        this.lblFilter.Location = new System.Drawing.Point(177, 11);
         this.lblFilter.Name = "lblFilter";
         this.lblFilter.Size = new System.Drawing.Size(38, 17);
         this.lblFilter.Text = "Type:";
@@ -148,28 +173,117 @@ partial class CustomerDashboard
         this.cmbListingTypeFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
         this.cmbListingTypeFilter.FormattingEnabled = true;
         this.cmbListingTypeFilter.Items.AddRange(new object[] { "All", "Sale", "Rent" });
-        this.cmbListingTypeFilter.Location = new System.Drawing.Point(365, 10);
+        this.cmbListingTypeFilter.Location = new System.Drawing.Point(217, 8);
         this.cmbListingTypeFilter.Name = "cmbListingTypeFilter";
-        this.cmbListingTypeFilter.Size = new System.Drawing.Size(100, 25);
+        this.cmbListingTypeFilter.Size = new System.Drawing.Size(65, 25);
+
+        // lblCategoryFilter
+        this.lblCategoryFilter.AutoSize = true;
+        this.lblCategoryFilter.Location = new System.Drawing.Point(286, 11);
+        this.lblCategoryFilter.Name = "lblCategoryFilter";
+        this.lblCategoryFilter.Size = new System.Drawing.Size(31, 17);
+        this.lblCategoryFilter.Text = "Cat:";
+
+        // cmbCategoryFilter
+        this.cmbCategoryFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbCategoryFilter.FormattingEnabled = true;
+        this.cmbCategoryFilter.Location = new System.Drawing.Point(320, 8);
+        this.cmbCategoryFilter.Name = "cmbCategoryFilter";
+        this.cmbCategoryFilter.Size = new System.Drawing.Size(105, 25);
+
+        // lblDistrictFilter
+        this.lblDistrictFilter.AutoSize = true;
+        this.lblDistrictFilter.Location = new System.Drawing.Point(430, 11);
+        this.lblDistrictFilter.Name = "lblDistrictFilter";
+        this.lblDistrictFilter.Size = new System.Drawing.Size(36, 17);
+        this.lblDistrictFilter.Text = "Dist:";
+
+        // cmbDistrictFilter
+        this.cmbDistrictFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbDistrictFilter.FormattingEnabled = true;
+        this.cmbDistrictFilter.Location = new System.Drawing.Point(468, 8);
+        this.cmbDistrictFilter.Name = "cmbDistrictFilter";
+        this.cmbDistrictFilter.Size = new System.Drawing.Size(95, 25);
+
+        // lblPriceFilter
+        this.lblPriceFilter.AutoSize = true;
+        this.lblPriceFilter.Location = new System.Drawing.Point(568, 11);
+        this.lblPriceFilter.Name = "lblPriceFilter";
+        this.lblPriceFilter.Size = new System.Drawing.Size(39, 17);
+        this.lblPriceFilter.Text = "Price:";
+
+        // cmbPriceFilter
+        this.cmbPriceFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbPriceFilter.FormattingEnabled = true;
+        this.cmbPriceFilter.Items.AddRange(new object[] {
+            "All",
+            "Under 20,000",
+            "20,000 - 50,000",
+            "50,000 - 1,00,000",
+            "1,00,000 - 50,00,000",
+            "Above 50,00,000"
+        });
+        this.cmbPriceFilter.Location = new System.Drawing.Point(610, 8);
+        this.cmbPriceFilter.Name = "cmbPriceFilter";
+        this.cmbPriceFilter.Size = new System.Drawing.Size(140, 25);
+
+        // lblBedroomsFilter
+        this.lblBedroomsFilter.AutoSize = true;
+        this.lblBedroomsFilter.Location = new System.Drawing.Point(755, 11);
+        this.lblBedroomsFilter.Name = "lblBedroomsFilter";
+        this.lblBedroomsFilter.Size = new System.Drawing.Size(40, 17);
+        this.lblBedroomsFilter.Text = "Beds:";
+
+        // cmbBedroomsFilter
+        this.cmbBedroomsFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbBedroomsFilter.FormattingEnabled = true;
+        this.cmbBedroomsFilter.Items.AddRange(new object[] { "All", "1", "2", "3", "4+" });
+        this.cmbBedroomsFilter.Location = new System.Drawing.Point(798, 8);
+        this.cmbBedroomsFilter.Name = "cmbBedroomsFilter";
+        this.cmbBedroomsFilter.Size = new System.Drawing.Size(55, 25);
+
+        // btnApplyFilters
+        this.btnApplyFilters.Location = new System.Drawing.Point(8, 38);
+        this.btnApplyFilters.Name = "btnApplyFilters";
+        this.btnApplyFilters.Size = new System.Drawing.Size(80, 27);
+        this.btnApplyFilters.Text = "Apply";
+        this.btnApplyFilters.UseVisualStyleBackColor = true;
+        this.btnApplyFilters.Click += new System.EventHandler(this.btnApplyFilters_Click);
+
+        // btnResetFilters
+        this.btnResetFilters.Location = new System.Drawing.Point(95, 38);
+        this.btnResetFilters.Name = "btnResetFilters";
+        this.btnResetFilters.Size = new System.Drawing.Size(80, 27);
+        this.btnResetFilters.Text = "Reset";
+        this.btnResetFilters.UseVisualStyleBackColor = true;
+        this.btnResetFilters.Click += new System.EventHandler(this.btnResetFilters_Click);
 
         // btnSearch
-        this.btnSearch.Location = new System.Drawing.Point(480, 9);
+        this.btnSearch.Location = new System.Drawing.Point(860, 7);
         this.btnSearch.Name = "btnSearch";
-        this.btnSearch.Size = new System.Drawing.Size(95, 27);
-        this.btnSearch.Text = "Search";
+        this.btnSearch.Size = new System.Drawing.Size(55, 27);
+        this.btnSearch.Text = "Go";
         this.btnSearch.UseVisualStyleBackColor = true;
         this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
+
+        // lblResultCount
+        this.lblResultCount.AutoSize = true;
+        this.lblResultCount.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.lblResultCount.Location = new System.Drawing.Point(190, 43);
+        this.lblResultCount.Name = "lblResultCount";
+        this.lblResultCount.Size = new System.Drawing.Size(125, 17);
+        this.lblResultCount.Text = "0 properties found";
 
         // dgvBrowseProperties
         this.dgvBrowseProperties.AllowUserToAddRows = false;
         this.dgvBrowseProperties.AllowUserToDeleteRows = false;
         this.dgvBrowseProperties.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        this.dgvBrowseProperties.Location = new System.Drawing.Point(8, 45);
+        this.dgvBrowseProperties.Location = new System.Drawing.Point(8, 70);
         this.dgvBrowseProperties.MultiSelect = false;
         this.dgvBrowseProperties.Name = "dgvBrowseProperties";
         this.dgvBrowseProperties.ReadOnly = true;
         this.dgvBrowseProperties.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-        this.dgvBrowseProperties.Size = new System.Drawing.Size(905, 365);
+        this.dgvBrowseProperties.Size = new System.Drawing.Size(905, 340);
 
         // btnAddToCart
         this.btnAddToCart.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
@@ -205,6 +319,8 @@ partial class CustomerDashboard
 
         // tabCart
         this.tabCart.Controls.Add(this.lblCartTotal);
+        this.tabCart.Controls.Add(this.lblPaymentMethod);
+        this.tabCart.Controls.Add(this.cmbPaymentMethod);
         this.tabCart.Controls.Add(this.btnRemoveFromCart);
         this.tabCart.Controls.Add(this.dgvCart);
         this.tabCart.Controls.Add(this.btnCheckout);
@@ -229,30 +345,52 @@ partial class CustomerDashboard
         // btnRemoveFromCart
         this.btnRemoveFromCart.Location = new System.Drawing.Point(8, 420);
         this.btnRemoveFromCart.Name = "btnRemoveFromCart";
-        this.btnRemoveFromCart.Size = new System.Drawing.Size(150, 35);
+        this.btnRemoveFromCart.Size = new System.Drawing.Size(125, 35);
         this.btnRemoveFromCart.Text = "Remove Item";
         this.btnRemoveFromCart.UseVisualStyleBackColor = true;
         this.btnRemoveFromCart.Click += new System.EventHandler(this.btnRemoveFromCart_Click);
 
+        // lblPaymentMethod
+        this.lblPaymentMethod.AutoSize = true;
+        this.lblPaymentMethod.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.lblPaymentMethod.Location = new System.Drawing.Point(145, 428);
+        this.lblPaymentMethod.Name = "lblPaymentMethod";
+        this.lblPaymentMethod.Size = new System.Drawing.Size(117, 17);
+        this.lblPaymentMethod.Text = "Payment Method:";
+
+        // cmbPaymentMethod
+        this.cmbPaymentMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbPaymentMethod.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+        this.cmbPaymentMethod.FormattingEnabled = true;
+        this.cmbPaymentMethod.Items.AddRange(new object[] {
+            "Card",
+            "bKash",
+            "Nagad",
+            "Bank Transfer"});
+        this.cmbPaymentMethod.Location = new System.Drawing.Point(268, 425);
+        this.cmbPaymentMethod.Name = "cmbPaymentMethod";
+        this.cmbPaymentMethod.Size = new System.Drawing.Size(130, 25);
+
         // btnCheckout
         this.btnCheckout.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-        this.btnCheckout.Location = new System.Drawing.Point(170, 420);
+        this.btnCheckout.Location = new System.Drawing.Point(410, 420);
         this.btnCheckout.Name = "btnCheckout";
-        this.btnCheckout.Size = new System.Drawing.Size(190, 35);
+        this.btnCheckout.Size = new System.Drawing.Size(175, 35);
         this.btnCheckout.Text = "Proceed to Checkout";
         this.btnCheckout.UseVisualStyleBackColor = true;
         this.btnCheckout.Click += new System.EventHandler(this.btnCheckout_Click);
 
         // lblCartTotal
         this.lblCartTotal.AutoSize = true;
-        this.lblCartTotal.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+        this.lblCartTotal.Font = new System.Drawing.Font("Segoe UI", 11.5F, System.Drawing.FontStyle.Bold);
         this.lblCartTotal.ForeColor = System.Drawing.Color.DarkGreen;
-        this.lblCartTotal.Location = new System.Drawing.Point(450, 426);
+        this.lblCartTotal.Location = new System.Drawing.Point(600, 427);
         this.lblCartTotal.Name = "lblCartTotal";
-        this.lblCartTotal.Size = new System.Drawing.Size(171, 21);
+        this.lblCartTotal.Size = new System.Drawing.Size(163, 21);
         this.lblCartTotal.Text = "Total Amount: ৳0.00";
 
         // tabOrders
+        this.tabOrders.Controls.Add(this.btnViewInvoice);
         this.tabOrders.Controls.Add(this.dgvOrders);
         this.tabOrders.Location = new System.Drawing.Point(4, 26);
         this.tabOrders.Name = "tabOrders";
@@ -265,12 +403,23 @@ partial class CustomerDashboard
         this.dgvOrders.AllowUserToAddRows = false;
         this.dgvOrders.AllowUserToDeleteRows = false;
         this.dgvOrders.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        this.dgvOrders.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.dgvOrders.Location = new System.Drawing.Point(3, 3);
+        this.dgvOrders.Location = new System.Drawing.Point(8, 8);
+        this.dgvOrders.MultiSelect = false;
         this.dgvOrders.Name = "dgvOrders";
         this.dgvOrders.ReadOnly = true;
         this.dgvOrders.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-        this.dgvOrders.Size = new System.Drawing.Size(916, 459);
+        this.dgvOrders.Size = new System.Drawing.Size(905, 400);
+        this.dgvOrders.SelectionChanged += new System.EventHandler(this.dgvOrders_SelectionChanged);
+
+        // btnViewInvoice
+        this.btnViewInvoice.Enabled = false;
+        this.btnViewInvoice.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.btnViewInvoice.Location = new System.Drawing.Point(8, 420);
+        this.btnViewInvoice.Name = "btnViewInvoice";
+        this.btnViewInvoice.Size = new System.Drawing.Size(150, 35);
+        this.btnViewInvoice.Text = "View Invoice";
+        this.btnViewInvoice.UseVisualStyleBackColor = true;
+        this.btnViewInvoice.Click += new System.EventHandler(this.btnViewInvoice_Click);
 
         // tabMyVisits
         this.tabMyVisits.Controls.Add(this.btnRefreshVisits);
@@ -555,7 +704,18 @@ partial class CustomerDashboard
     private System.Windows.Forms.TextBox txtSearch;
     private System.Windows.Forms.Label lblFilter;
     private System.Windows.Forms.ComboBox cmbListingTypeFilter;
+    private System.Windows.Forms.Label lblCategoryFilter;
+    private System.Windows.Forms.ComboBox cmbCategoryFilter;
+    private System.Windows.Forms.Label lblDistrictFilter;
+    private System.Windows.Forms.ComboBox cmbDistrictFilter;
+    private System.Windows.Forms.Label lblPriceFilter;
+    private System.Windows.Forms.ComboBox cmbPriceFilter;
+    private System.Windows.Forms.Label lblBedroomsFilter;
+    private System.Windows.Forms.ComboBox cmbBedroomsFilter;
     private System.Windows.Forms.Button btnSearch;
+    private System.Windows.Forms.Button btnApplyFilters;
+    private System.Windows.Forms.Button btnResetFilters;
+    private System.Windows.Forms.Label lblResultCount;
     private System.Windows.Forms.DataGridView dgvBrowseProperties;
     private System.Windows.Forms.Button btnAddToCart;
     private System.Windows.Forms.Button btnRequestVisit;
@@ -565,9 +725,12 @@ partial class CustomerDashboard
     private System.Windows.Forms.DataGridView dgvCart;
     private System.Windows.Forms.Button btnRemoveFromCart;
     private System.Windows.Forms.Button btnCheckout;
+    private System.Windows.Forms.Label lblPaymentMethod;
+    private System.Windows.Forms.ComboBox cmbPaymentMethod;
     private System.Windows.Forms.Label lblCartTotal;
     private System.Windows.Forms.TabPage tabOrders;
     private System.Windows.Forms.DataGridView dgvOrders;
+    private System.Windows.Forms.Button btnViewInvoice;
     private System.Windows.Forms.TabPage tabMyVisits;
     private System.Windows.Forms.DataGridView dgvMyVisits;
     private System.Windows.Forms.Button btnRefreshVisits;

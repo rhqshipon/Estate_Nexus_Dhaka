@@ -49,11 +49,34 @@ namespace EstateNexus
                     int available = list.Count(p => p.Status == "Available");
                     int sold = total - available;
                     lblPropertyStats.Text = $"Total: {total} | Available: {available} | Sold: {sold}";
+
+                    btnEditProperty.Enabled = dgvMyProperties.SelectedRows.Count > 0;
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error loading properties: " + ex.Message);
+            }
+        }
+
+        private void dgvMyProperties_SelectionChanged(object sender, EventArgs e)
+        {
+            btnEditProperty.Enabled = dgvMyProperties.SelectedRows.Count > 0;
+        }
+
+        private void btnEditProperty_Click(object sender, EventArgs e)
+        {
+            if (dgvMyProperties.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Please select a property to edit.", "Selection Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            int propertyId = Convert.ToInt32(dgvMyProperties.SelectedRows[0].Cells["PropertyId"].Value);
+            using var editForm = new AddPropertyForm(propertyId);
+            if (editForm.ShowDialog() == DialogResult.OK)
+            {
+                LoadMyProperties();
             }
         }
 

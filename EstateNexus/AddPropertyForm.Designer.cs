@@ -36,10 +36,15 @@ partial class AddPropertyForm
         this.txtPrice = new System.Windows.Forms.TextBox();
         this.lblDescription = new System.Windows.Forms.Label();
         this.txtDescription = new System.Windows.Forms.TextBox();
+        this.lblImage = new System.Windows.Forms.Label();
+        this.btnChooseImage = new System.Windows.Forms.Button();
+        this.lblImagePath = new System.Windows.Forms.Label();
+        this.picImagePreview = new System.Windows.Forms.PictureBox();
         this.btnSave = new System.Windows.Forms.Button();
         this.btnCancel = new System.Windows.Forms.Button();
         ((System.ComponentModel.ISupportInitialize)(this.numBedrooms)).BeginInit();
         ((System.ComponentModel.ISupportInitialize)(this.numBathrooms)).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)(this.picImagePreview)).BeginInit();
         this.SuspendLayout();
 
         // lblTitle
@@ -196,9 +201,44 @@ partial class AddPropertyForm
         this.txtDescription.Name = "txtDescription";
         this.txtDescription.Size = new System.Drawing.Size(370, 65);
 
+        // lblImage
+        this.lblImage.AutoSize = true;
+        this.lblImage.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+        this.lblImage.Location = new System.Drawing.Point(30, 420);
+        this.lblImage.Name = "lblImage";
+        this.lblImage.Size = new System.Drawing.Size(46, 17);
+        this.lblImage.Text = "Image:";
+
+        // btnChooseImage
+        this.btnChooseImage.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+        this.btnChooseImage.Location = new System.Drawing.Point(140, 415);
+        this.btnChooseImage.Name = "btnChooseImage";
+        this.btnChooseImage.Size = new System.Drawing.Size(120, 30);
+        this.btnChooseImage.Text = "Choose Image";
+        this.btnChooseImage.UseVisualStyleBackColor = true;
+        this.btnChooseImage.Click += new System.EventHandler(this.btnChooseImage_Click);
+
+        // lblImagePath
+        this.lblImagePath.AutoSize = true;
+        this.lblImagePath.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+        this.lblImagePath.ForeColor = System.Drawing.Color.DimGray;
+        this.lblImagePath.Location = new System.Drawing.Point(270, 422);
+        this.lblImagePath.Name = "lblImagePath";
+        this.lblImagePath.Size = new System.Drawing.Size(110, 15);
+        this.lblImagePath.Text = "No image selected";
+
+        // picImagePreview
+        this.picImagePreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+        this.picImagePreview.Location = new System.Drawing.Point(140, 452);
+        this.picImagePreview.Name = "picImagePreview";
+        this.picImagePreview.Size = new System.Drawing.Size(150, 95);
+        this.picImagePreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+        this.picImagePreview.TabIndex = 24;
+        this.picImagePreview.TabStop = false;
+
         // btnSave
         this.btnSave.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-        this.btnSave.Location = new System.Drawing.Point(140, 425);
+        this.btnSave.Location = new System.Drawing.Point(140, 560);
         this.btnSave.Name = "btnSave";
         this.btnSave.Size = new System.Drawing.Size(170, 36);
         this.btnSave.Text = "Save Property";
@@ -207,7 +247,7 @@ partial class AddPropertyForm
 
         // btnCancel
         this.btnCancel.Font = new System.Drawing.Font("Segoe UI", 10F);
-        this.btnCancel.Location = new System.Drawing.Point(340, 425);
+        this.btnCancel.Location = new System.Drawing.Point(340, 560);
         this.btnCancel.Name = "btnCancel";
         this.btnCancel.Size = new System.Drawing.Size(170, 36);
         this.btnCancel.Text = "Cancel";
@@ -215,7 +255,7 @@ partial class AddPropertyForm
         this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
 
         // AddPropertyForm
-        this.ClientSize = new System.Drawing.Size(560, 480);
+        this.ClientSize = new System.Drawing.Size(560, 615);
         this.Controls.Add(this.lblTitle);
         this.Controls.Add(this.lblPropertyName);
         this.Controls.Add(this.txtPropertyName);
@@ -237,6 +277,10 @@ partial class AddPropertyForm
         this.Controls.Add(this.txtPrice);
         this.Controls.Add(this.lblDescription);
         this.Controls.Add(this.txtDescription);
+        this.Controls.Add(this.lblImage);
+        this.Controls.Add(this.btnChooseImage);
+        this.Controls.Add(this.lblImagePath);
+        this.Controls.Add(this.picImagePreview);
         this.Controls.Add(this.btnSave);
         this.Controls.Add(this.btnCancel);
         this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -247,6 +291,7 @@ partial class AddPropertyForm
         this.Load += new System.EventHandler(this.AddPropertyForm_Load);
         ((System.ComponentModel.ISupportInitialize)(this.numBedrooms)).EndInit();
         ((System.ComponentModel.ISupportInitialize)(this.numBathrooms)).EndInit();
+        ((System.ComponentModel.ISupportInitialize)(this.picImagePreview)).EndInit();
         this.ResumeLayout(false);
         this.PerformLayout();
     }
@@ -272,6 +317,10 @@ partial class AddPropertyForm
     private System.Windows.Forms.TextBox txtPrice;
     private System.Windows.Forms.Label lblDescription;
     private System.Windows.Forms.TextBox txtDescription;
+    private System.Windows.Forms.Label lblImage;
+    private System.Windows.Forms.Button btnChooseImage;
+    private System.Windows.Forms.Label lblImagePath;
+    private System.Windows.Forms.PictureBox picImagePreview;
     private System.Windows.Forms.Button btnSave;
     private System.Windows.Forms.Button btnCancel;
 }
