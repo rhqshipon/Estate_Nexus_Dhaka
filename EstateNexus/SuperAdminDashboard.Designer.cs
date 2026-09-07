@@ -19,8 +19,13 @@ partial class SuperAdminDashboard
         this.btnLogout = new System.Windows.Forms.Button();
         this.tabControl1 = new System.Windows.Forms.TabControl();
         this.tabUsers = new System.Windows.Forms.TabPage();
-        this.btnDeleteUser = new System.Windows.Forms.Button();
         this.btnToggleStatus = new System.Windows.Forms.Button();
+        this.btnApproveUser = new System.Windows.Forms.Button();
+        this.btnRejectUser = new System.Windows.Forms.Button();
+        this.btnDeleteUser = new System.Windows.Forms.Button();
+        this.cmbUserStatusFilter = new System.Windows.Forms.ComboBox();
+        this.cmbUserRoleFilter = new System.Windows.Forms.ComboBox();
+        this.lblPendingCount = new System.Windows.Forms.Label();
         this.dgvUsers = new System.Windows.Forms.DataGridView();
         this.tabProperties = new System.Windows.Forms.TabPage();
         this.btnDeleteProperty = new System.Windows.Forms.Button();
@@ -67,8 +72,13 @@ partial class SuperAdminDashboard
         this.tabControl1.Size = new System.Drawing.Size(930, 495);
 
         // tabUsers
-        this.tabUsers.Controls.Add(this.btnDeleteUser);
         this.tabUsers.Controls.Add(this.btnToggleStatus);
+        this.tabUsers.Controls.Add(this.btnApproveUser);
+        this.tabUsers.Controls.Add(this.btnRejectUser);
+        this.tabUsers.Controls.Add(this.btnDeleteUser);
+        this.tabUsers.Controls.Add(this.cmbUserStatusFilter);
+        this.tabUsers.Controls.Add(this.cmbUserRoleFilter);
+        this.tabUsers.Controls.Add(this.lblPendingCount);
         this.tabUsers.Controls.Add(this.dgvUsers);
         this.tabUsers.Location = new System.Drawing.Point(4, 26);
         this.tabUsers.Name = "tabUsers";
@@ -81,18 +91,61 @@ partial class SuperAdminDashboard
         this.btnToggleStatus.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
         this.btnToggleStatus.Location = new System.Drawing.Point(8, 8);
         this.btnToggleStatus.Name = "btnToggleStatus";
-        this.btnToggleStatus.Size = new System.Drawing.Size(180, 32);
-        this.btnToggleStatus.Text = "Toggle Active / Inactive";
+        this.btnToggleStatus.Size = new System.Drawing.Size(100, 32);
+        this.btnToggleStatus.Text = "Suspend";
         this.btnToggleStatus.UseVisualStyleBackColor = true;
         this.btnToggleStatus.Click += new System.EventHandler(this.btnToggleStatus_Click);
 
+        // btnApproveUser
+        this.btnApproveUser.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.btnApproveUser.Location = new System.Drawing.Point(114, 8);
+        this.btnApproveUser.Name = "btnApproveUser";
+        this.btnApproveUser.Size = new System.Drawing.Size(80, 32);
+        this.btnApproveUser.Text = "Approve";
+        this.btnApproveUser.UseVisualStyleBackColor = true;
+        this.btnApproveUser.Click += new System.EventHandler(this.btnApproveUser_Click);
+
+        // btnRejectUser
+        this.btnRejectUser.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.btnRejectUser.Location = new System.Drawing.Point(200, 8);
+        this.btnRejectUser.Name = "btnRejectUser";
+        this.btnRejectUser.Size = new System.Drawing.Size(80, 32);
+        this.btnRejectUser.Text = "Reject";
+        this.btnRejectUser.UseVisualStyleBackColor = true;
+        this.btnRejectUser.Click += new System.EventHandler(this.btnRejectUser_Click);
+
         // btnDeleteUser
-        this.btnDeleteUser.Location = new System.Drawing.Point(200, 8);
+        this.btnDeleteUser.Location = new System.Drawing.Point(286, 8);
         this.btnDeleteUser.Name = "btnDeleteUser";
-        this.btnDeleteUser.Size = new System.Drawing.Size(140, 32);
+        this.btnDeleteUser.Size = new System.Drawing.Size(95, 32);
         this.btnDeleteUser.Text = "Delete User";
         this.btnDeleteUser.UseVisualStyleBackColor = true;
         this.btnDeleteUser.Click += new System.EventHandler(this.btnDeleteUser_Click);
+
+        // cmbUserStatusFilter
+        this.cmbUserStatusFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbUserStatusFilter.FormattingEnabled = true;
+        this.cmbUserStatusFilter.Location = new System.Drawing.Point(390, 11);
+        this.cmbUserStatusFilter.Name = "cmbUserStatusFilter";
+        this.cmbUserStatusFilter.Size = new System.Drawing.Size(105, 25);
+        this.cmbUserStatusFilter.SelectedIndexChanged += new System.EventHandler(this.cmbUserStatusFilter_SelectedIndexChanged);
+
+        // cmbUserRoleFilter
+        this.cmbUserRoleFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.cmbUserRoleFilter.FormattingEnabled = true;
+        this.cmbUserRoleFilter.Location = new System.Drawing.Point(502, 11);
+        this.cmbUserRoleFilter.Name = "cmbUserRoleFilter";
+        this.cmbUserRoleFilter.Size = new System.Drawing.Size(105, 25);
+        this.cmbUserRoleFilter.SelectedIndexChanged += new System.EventHandler(this.cmbUserRoleFilter_SelectedIndexChanged);
+
+        // lblPendingCount
+        this.lblPendingCount.AutoSize = true;
+        this.lblPendingCount.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+        this.lblPendingCount.ForeColor = System.Drawing.Color.DarkRed;
+        this.lblPendingCount.Location = new System.Drawing.Point(615, 15);
+        this.lblPendingCount.Name = "lblPendingCount";
+        this.lblPendingCount.Size = new System.Drawing.Size(140, 17);
+        this.lblPendingCount.Text = "Pending approvals: 0";
 
         // dgvUsers
         this.dgvUsers.AllowUserToAddRows = false;
@@ -104,6 +157,7 @@ partial class SuperAdminDashboard
         this.dgvUsers.ReadOnly = true;
         this.dgvUsers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
         this.dgvUsers.Size = new System.Drawing.Size(905, 405);
+        this.dgvUsers.SelectionChanged += new System.EventHandler(this.dgvUsers_SelectionChanged);
 
         // tabProperties
         this.tabProperties.Controls.Add(this.btnDeleteProperty);
@@ -202,7 +256,12 @@ partial class SuperAdminDashboard
     private System.Windows.Forms.TabPage tabUsers;
     private System.Windows.Forms.DataGridView dgvUsers;
     private System.Windows.Forms.Button btnToggleStatus;
+    private System.Windows.Forms.Button btnApproveUser;
+    private System.Windows.Forms.Button btnRejectUser;
     private System.Windows.Forms.Button btnDeleteUser;
+    private System.Windows.Forms.ComboBox cmbUserStatusFilter;
+    private System.Windows.Forms.ComboBox cmbUserRoleFilter;
+    private System.Windows.Forms.Label lblPendingCount;
     private System.Windows.Forms.TabPage tabProperties;
     private System.Windows.Forms.DataGridView dgvProperties;
     private System.Windows.Forms.Button btnDeleteProperty;

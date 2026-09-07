@@ -15,6 +15,7 @@ partial class RegistrationForm
 
     private void InitializeComponent()
     {
+        this.components = new System.ComponentModel.Container();
         this.lblTitle = new System.Windows.Forms.Label();
         this.lblName = new System.Windows.Forms.Label();
         this.txtName = new System.Windows.Forms.TextBox();
@@ -26,10 +27,15 @@ partial class RegistrationForm
         this.txtPhone = new System.Windows.Forms.TextBox();
         this.lblPassword = new System.Windows.Forms.Label();
         this.txtPassword = new System.Windows.Forms.TextBox();
+        this.lblConfirmPassword = new System.Windows.Forms.Label();
+        this.txtConfirmPassword = new System.Windows.Forms.TextBox();
         this.lblRole = new System.Windows.Forms.Label();
         this.cmbRole = new System.Windows.Forms.ComboBox();
+        this.lblRegError = new System.Windows.Forms.Label();
         this.btnRegister = new System.Windows.Forms.Button();
         this.btnCancel = new System.Windows.Forms.Button();
+        this.errRegistration = new System.Windows.Forms.ErrorProvider(this.components);
+        ((System.ComponentModel.ISupportInitialize)(this.errRegistration)).BeginInit();
         this.SuspendLayout();
 
         // lblTitle
@@ -50,9 +56,9 @@ partial class RegistrationForm
 
         // txtName
         this.txtName.Font = new System.Drawing.Font("Segoe UI", 10F);
-        this.txtName.Location = new System.Drawing.Point(150, 62);
+        this.txtName.Location = new System.Drawing.Point(175, 62);
         this.txtName.Name = "txtName";
-        this.txtName.Size = new System.Drawing.Size(260, 25);
+        this.txtName.Size = new System.Drawing.Size(255, 25);
 
         // lblUsername
         this.lblUsername.AutoSize = true;
@@ -64,9 +70,9 @@ partial class RegistrationForm
 
         // txtUsername
         this.txtUsername.Font = new System.Drawing.Font("Segoe UI", 10F);
-        this.txtUsername.Location = new System.Drawing.Point(150, 102);
+        this.txtUsername.Location = new System.Drawing.Point(175, 102);
         this.txtUsername.Name = "txtUsername";
-        this.txtUsername.Size = new System.Drawing.Size(260, 25);
+        this.txtUsername.Size = new System.Drawing.Size(255, 25);
 
         // lblEmail
         this.lblEmail.AutoSize = true;
@@ -78,9 +84,9 @@ partial class RegistrationForm
 
         // txtEmail
         this.txtEmail.Font = new System.Drawing.Font("Segoe UI", 10F);
-        this.txtEmail.Location = new System.Drawing.Point(150, 142);
+        this.txtEmail.Location = new System.Drawing.Point(175, 142);
         this.txtEmail.Name = "txtEmail";
-        this.txtEmail.Size = new System.Drawing.Size(260, 25);
+        this.txtEmail.Size = new System.Drawing.Size(255, 25);
 
         // lblPhone
         this.lblPhone.AutoSize = true;
@@ -92,9 +98,9 @@ partial class RegistrationForm
 
         // txtPhone
         this.txtPhone.Font = new System.Drawing.Font("Segoe UI", 10F);
-        this.txtPhone.Location = new System.Drawing.Point(150, 182);
+        this.txtPhone.Location = new System.Drawing.Point(175, 182);
         this.txtPhone.Name = "txtPhone";
-        this.txtPhone.Size = new System.Drawing.Size(260, 25);
+        this.txtPhone.Size = new System.Drawing.Size(255, 25);
 
         // lblPassword
         this.lblPassword.AutoSize = true;
@@ -106,15 +112,30 @@ partial class RegistrationForm
 
         // txtPassword
         this.txtPassword.Font = new System.Drawing.Font("Segoe UI", 10F);
-        this.txtPassword.Location = new System.Drawing.Point(150, 222);
+        this.txtPassword.Location = new System.Drawing.Point(175, 222);
         this.txtPassword.Name = "txtPassword";
         this.txtPassword.PasswordChar = '*';
-        this.txtPassword.Size = new System.Drawing.Size(260, 25);
+        this.txtPassword.Size = new System.Drawing.Size(255, 25);
+
+        // lblConfirmPassword
+        this.lblConfirmPassword.AutoSize = true;
+        this.lblConfirmPassword.Font = new System.Drawing.Font("Segoe UI", 10F);
+        this.lblConfirmPassword.Location = new System.Drawing.Point(45, 265);
+        this.lblConfirmPassword.Name = "lblConfirmPassword";
+        this.lblConfirmPassword.Size = new System.Drawing.Size(120, 19);
+        this.lblConfirmPassword.Text = "Confirm Password:";
+
+        // txtConfirmPassword
+        this.txtConfirmPassword.Font = new System.Drawing.Font("Segoe UI", 10F);
+        this.txtConfirmPassword.Location = new System.Drawing.Point(175, 262);
+        this.txtConfirmPassword.Name = "txtConfirmPassword";
+        this.txtConfirmPassword.PasswordChar = '*';
+        this.txtConfirmPassword.Size = new System.Drawing.Size(255, 25);
 
         // lblRole
         this.lblRole.AutoSize = true;
         this.lblRole.Font = new System.Drawing.Font("Segoe UI", 10F);
-        this.lblRole.Location = new System.Drawing.Point(45, 265);
+        this.lblRole.Location = new System.Drawing.Point(45, 305);
         this.lblRole.Name = "lblRole";
         this.lblRole.Size = new System.Drawing.Size(38, 19);
         this.lblRole.Text = "Role:";
@@ -124,13 +145,22 @@ partial class RegistrationForm
         this.cmbRole.Font = new System.Drawing.Font("Segoe UI", 10F);
         this.cmbRole.FormattingEnabled = true;
         this.cmbRole.Items.AddRange(new object[] { "Customer", "Admin" });
-        this.cmbRole.Location = new System.Drawing.Point(150, 262);
+        this.cmbRole.Location = new System.Drawing.Point(175, 302);
         this.cmbRole.Name = "cmbRole";
-        this.cmbRole.Size = new System.Drawing.Size(260, 25);
+        this.cmbRole.Size = new System.Drawing.Size(255, 25);
+
+        // lblRegError
+        this.lblRegError.AutoSize = true;
+        this.lblRegError.Font = new System.Drawing.Font("Segoe UI", 9F);
+        this.lblRegError.ForeColor = System.Drawing.Color.Red;
+        this.lblRegError.Location = new System.Drawing.Point(45, 340);
+        this.lblRegError.Name = "lblRegError";
+        this.lblRegError.Size = new System.Drawing.Size(0, 15);
+        this.lblRegError.Text = "";
 
         // btnRegister
         this.btnRegister.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-        this.btnRegister.Location = new System.Drawing.Point(150, 315);
+        this.btnRegister.Location = new System.Drawing.Point(175, 365);
         this.btnRegister.Name = "btnRegister";
         this.btnRegister.Size = new System.Drawing.Size(120, 36);
         this.btnRegister.Text = "Register";
@@ -139,7 +169,7 @@ partial class RegistrationForm
 
         // btnCancel
         this.btnCancel.Font = new System.Drawing.Font("Segoe UI", 10F);
-        this.btnCancel.Location = new System.Drawing.Point(290, 315);
+        this.btnCancel.Location = new System.Drawing.Point(310, 365);
         this.btnCancel.Name = "btnCancel";
         this.btnCancel.Size = new System.Drawing.Size(120, 36);
         this.btnCancel.Text = "Cancel";
@@ -147,11 +177,14 @@ partial class RegistrationForm
         this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
 
         // RegistrationForm
-        this.ClientSize = new System.Drawing.Size(480, 390);
+        this.ClientSize = new System.Drawing.Size(480, 430);
+        this.Controls.Add(this.lblRegError);
         this.Controls.Add(this.btnCancel);
         this.Controls.Add(this.btnRegister);
         this.Controls.Add(this.cmbRole);
         this.Controls.Add(this.lblRole);
+        this.Controls.Add(this.txtConfirmPassword);
+        this.Controls.Add(this.lblConfirmPassword);
         this.Controls.Add(this.txtPassword);
         this.Controls.Add(this.lblPassword);
         this.Controls.Add(this.txtPhone);
@@ -168,6 +201,7 @@ partial class RegistrationForm
         this.Name = "RegistrationForm";
         this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
         this.Text = "EstateNexus - Registration";
+        ((System.ComponentModel.ISupportInitialize)(this.errRegistration)).EndInit();
         this.ResumeLayout(false);
         this.PerformLayout();
     }
@@ -183,8 +217,12 @@ partial class RegistrationForm
     private System.Windows.Forms.TextBox txtPhone;
     private System.Windows.Forms.Label lblPassword;
     private System.Windows.Forms.TextBox txtPassword;
+    private System.Windows.Forms.Label lblConfirmPassword;
+    private System.Windows.Forms.TextBox txtConfirmPassword;
     private System.Windows.Forms.Label lblRole;
     private System.Windows.Forms.ComboBox cmbRole;
+    private System.Windows.Forms.Label lblRegError;
+    private System.Windows.Forms.ErrorProvider errRegistration;
     private System.Windows.Forms.Button btnRegister;
     private System.Windows.Forms.Button btnCancel;
 }

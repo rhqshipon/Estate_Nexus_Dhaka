@@ -1,31 +1,4 @@
-<<<<<<< Updated upstream
 # Estate_Nexus_Dhaka
-=======
-
-# EstateNexus — Project Report
-## Object Oriented Programming (CSC 2101)
-
----
-
-[COVER PAGE — FILL IN MANUALLY]
-
-University Name:
-Section:
-Group Number:
-Supervisor Name:
-
-Team Members:
-
-| Name | Student ID |
-|------|------------|
-| Member 1 | |
-| Member 2 | |
-
-Submission Date: September 2026
-
----
-
-[CO2 AND CO3 RUBRIC TABLES — INSERT FROM FACULTY-PROVIDED RUBRIC]
 
 ---
 
@@ -1027,4 +1000,4 @@ Currently there is no self-service password recovery flow. A future addition wou
 **Mobile or Web Version**
 
 The current application is a Windows desktop program. A future version could expose the same SQL Server database through a REST API and deliver the customer-facing experience as a mobile application or a web portal, significantly expanding the platform's reach.
->>>>>>> Stashed changes
+
