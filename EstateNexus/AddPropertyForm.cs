@@ -89,8 +89,8 @@ namespace EstateNexus
                     : prop.AreaLocation;
                 txtAddress.Text = prop.FullAddress;
                 txtArea.Text = prop.AreaSize.ToString("0.##");
-                numBedrooms.Value = Math.Max(numBedrooms.Minimum, Math.Min(numBedrooms.Maximum, prop.Bedrooms));
-                numBathrooms.Value = Math.Max(numBathrooms.Minimum, Math.Min(numBathrooms.Maximum, prop.Bathrooms));
+                numBedrooms.Value = Math.Max(numBedrooms.Minimum, Math.Min(numBedrooms.Maximum, prop.Bedrooms ?? 0));
+                numBathrooms.Value = Math.Max(numBathrooms.Minimum, Math.Min(numBathrooms.Maximum, prop.Bathrooms ?? 0));
                 txtPrice.Text = prop.Price.ToString("0.##");
                 txtDescription.Text = prop.Description ?? "";
 

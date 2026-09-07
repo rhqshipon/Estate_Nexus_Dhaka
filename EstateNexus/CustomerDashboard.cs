@@ -415,7 +415,7 @@ namespace EstateNexus
                     }
 
                     decimal totalAmount = cart.CartItems.Sum(ci => ci.OfferedPrice ?? (ci.Property.ListingType == "Rent" ? ci.Property.Price * (ci.RentalMonths > 0 ? ci.RentalMonths : 1) : ci.Property.Price));
-                    string transactionType = cart.CartItems.Any(ci => ci.Property.ListingType == "Rent") ? "Rental" : "Sale";
+                    string transactionType = cart.CartItems.Any(ci => ci.Property.ListingType == "Rent") ? "Rent" : "Sale";
 
                     // 1. Create Order
                     var order = new Order
@@ -526,9 +526,7 @@ namespace EstateNexus
         {
             if (tabControl1.SelectedTab == tabBrowse)
             {
-                string term = txtSearch.Text.Trim();
-                string type = cmbListingTypeFilter.SelectedItem?.ToString() ?? "All";
-                LoadBrowseProperties(term, type);
+                ApplyBrowseFilters();
             }
             else if (tabControl1.SelectedTab == tabCart)
             {
