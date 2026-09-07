@@ -17,8 +17,8 @@ namespace EstateNexus
                 {
                     return configConn;
                 }
+                return @"Data Source=localhost;Initial Catalog=EstateNexusDBB;Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
 
-                return @"Data Source=.\MSSQLSERVER01;Initial Catalog=EstateNexusDB;Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
             }
         }
 
@@ -1210,6 +1210,7 @@ namespace EstateNexus
             }
             catch
             {
+                // Fallback silently if database not reachable at startup
                 // Database will still run if optional seed data fails.
             }
         }
@@ -1354,6 +1355,16 @@ namespace EstateNexus
                     );
 
                 END
+                ELSE
+                BEGIN
+
+                    UPDATE Users
+                    SET PasswordHash = @PasswordHash,
+                        AccountStatus = 'Active',
+                        IsActive = 1
+                    WHERE Email = 'admin@estatenexus.com';
+
+                END
             ";
 
             using (SqlCommand command =
@@ -1416,6 +1427,16 @@ namespace EstateNexus
                     );
 
                 END
+                ELSE
+                BEGIN
+
+                    UPDATE Users
+                    SET PasswordHash = @PasswordHash,
+                        AccountStatus = 'Active',
+                        IsActive = 1
+                    WHERE Email = 'seller@estatenexus.com';
+
+                END
             ";
 
             using (SqlCommand command =
@@ -1476,6 +1497,16 @@ namespace EstateNexus
                         1,
                         GETDATE()
                     );
+
+                END
+                ELSE
+                BEGIN
+
+                    UPDATE Users
+                    SET PasswordHash = @PasswordHash,
+                        AccountStatus = 'Active',
+                        IsActive = 1
+                    WHERE Email = 'customer@estatenexus.com';
 
                 END
             ";
@@ -1867,6 +1898,266 @@ namespace EstateNexus
                         'Approved',
                         0,
                         GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Cozy 2-BHK Flat in Uttara',
+                        'Rent',
+                        'Dhaka',
+                        'Uttara',
+                        'Sector 3, Road 14, Uttara, Dhaka',
+                        1250.00,
+                        'sqft',
+                        2,
+                        2,
+                        35000.00,
+                        'Bright and airy flat located within walking distance of airport and metro station.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Executive 3-BHK Furnished Apartment in Bashundhara',
+                        'Rent',
+                        'Dhaka',
+                        'Bashundhara R/A',
+                        'Block C, Road 5, Bashundhara R/A, Dhaka',
+                        1850.00,
+                        'sqft',
+                        3,
+                        3,
+                        55000.00,
+                        'Fully furnished 3-bedroom apartment with modern interior, imported fixtures, lake view, and 24/7 security.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Brand New 4-BHK Luxury Flat in Mirpur DOHS',
+                        'Sale',
+                        'Dhaka',
+                        'Mirpur DOHS',
+                        'Avenue 3, Road 8, Mirpur DOHS, Dhaka',
+                        2400.00,
+                        'sqft',
+                        4,
+                        4,
+                        18500000.00,
+                        'Spacious south-facing family apartment in serene and secure cantonment environment with double car parking.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @HouseId,
+                        'Exclusive Triplex Luxury Villa in Baridhara',
+                        'Sale',
+                        'Dhaka',
+                        'Baridhara',
+                        'Road 2, Park Way, Baridhara Diplomatic Zone, Dhaka',
+                        5200.00,
+                        'sqft',
+                        5,
+                        6,
+                        85000000.00,
+                        'Architectural masterpiece triplex villa featuring private indoor heated swimming pool, landscaped lawn, high-tech security, and premium Italian marble finishing.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @HouseId,
+                        'Spacious Colonial Style Duplex House in Dhanmondi',
+                        'Rent',
+                        'Dhaka',
+                        'Dhanmondi',
+                        'Road 9/A, Dhanmondi Residential Area, Dhaka',
+                        4000.00,
+                        'sqft',
+                        4,
+                        5,
+                        175000.00,
+                        'Quiet and elegant duplex home with private driveway, lush green front garden, and rooftop BBQ zone.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @CommercialId,
+                        'Corporate Floor Space in Motijheel Financial Hub',
+                        'Sale',
+                        'Dhaka',
+                        'Motijheel',
+                        'Dilkusha Commercial Area, Motijheel, Dhaka',
+                        3200.00,
+                        'sqft',
+                        0,
+                        4,
+                        42000000.00,
+                        'Prime full corporate commercial floor suitable for multinational bank, financial institution, or corporate headquarters.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @CommercialId,
+                        'Premium Retail Showroom on Gulshan Avenue',
+                        'Rent',
+                        'Dhaka',
+                        'Gulshan',
+                        'Gulshan Avenue, Gulshan-1, Dhaka',
+                        2200.00,
+                        'sqft',
+                        0,
+                        2,
+                        210000.00,
+                        'High-footfall ground floor commercial glass showroom facing main Gulshan Avenue with grand frontage and customer parking.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @LandId,
+                        'South-Facing 5 Katha Residential Plot in Bashundhara',
+                        'Sale',
+                        'Dhaka',
+                        'Bashundhara R/A',
+                        'Plot 340, Road 12, Block I, Bashundhara R/A, Dhaka',
+                        3600.00,
+                        'sqft',
+                        0,
+                        0,
+                        14500000.00,
+                        'Demarcated ready plot with Rajuk approved layout, wide 40ft road frontage, and immediate registration.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @LandId,
+                        'Prime 10 Katha Corner Commercial Plot in Uttara',
+                        'Sale',
+                        'Dhaka',
+                        'Uttara',
+                        'Sector 18, Road 204, Uttara 3rd Phase, Dhaka',
+                        7200.00,
+                        'sqft',
+                        0,
+                        0,
+                        38000000.00,
+                        'Corner commercial plot beside metro rail depot, ideal for commercial complex, private hospital, or international school.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Modern 3-BHK Flat in Peaceful Mohakhali DOHS',
+                        'Rent',
+                        'Dhaka',
+                        'Mohakhali DOHS',
+                        'Road 14, Mohakhali DOHS, Dhaka',
+                        1650.00,
+                        'sqft',
+                        3,
+                        3,
+                        48000.00,
+                        'Bright and cross-ventilated 3-bedroom flat on middle floor, strictly family residential community.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Sea-Breeze Luxury 3-BHK Apartment in Nasirabad',
+                        'Sale',
+                        'Chittagong',
+                        'Nasirabad',
+                        'Nasirabad Housing Society, Road 3, Chittagong',
+                        2050.00,
+                        'sqft',
+                        3,
+                        3,
+                        16000000.00,
+                        'Panoramic hill and city view luxury apartment in premier residential neighborhood of Chittagong.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @HouseId,
+                        'Charming 4-BHK Independent House in Sylhet',
+                        'Rent',
+                        'Sylhet',
+                        'Shahjalal Uposhohor',
+                        'Block D, Main Road, Shahjalal Uposhohor, Sylhet',
+                        2800.00,
+                        'sqft',
+                        4,
+                        4,
+                        40000.00,
+                        'Independent double-storey home with fruit garden, front courtyard, and peaceful environment.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Affordable 2-BHK Family Flat in Khilgaon',
+                        'Rent',
+                        'Dhaka',
+                        'Khilgaon',
+                        'Taltola City Corporation Road, Khilgaon, Dhaka',
+                        1050.00,
+                        'sqft',
+                        2,
+                        2,
+                        22000.00,
+                        'Budget-friendly family flat close to market, schools, and transit facilities with continuous utility supply.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
                     );
 
                 END
@@ -1876,6 +2167,7 @@ namespace EstateNexus
                    new SqlCommand(query, connection))
             {
                 command.ExecuteNonQuery();
+
             }
         }
     }
