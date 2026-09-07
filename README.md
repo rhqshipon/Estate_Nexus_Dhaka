@@ -4,13 +4,13 @@
 
 ## Table of Contents
 
-Chapter 1 — Introduction and Case Study 
-Chapter 2 — Functional Requirements and User Stories 
-Chapter 3 — UI Navigation Diagram and Flow Explanation 
-Chapter 4 — Database Design, Table Descriptions, and Normalisation 
-Chapter 5 — SQL Queries, Feature by Feature, with Explanations 
-Chapter 6 — User Interface Design and Screenshots 
-Chapter 7 — Work Distribution Table 
+Chapter 1 — Introduction and Case Study \
+Chapter 2 — Functional Requirements and User Stories \
+Chapter 3 — UI Navigation Diagram and Flow Explanation \
+Chapter 4 — Database Design, Table Descriptions, and Normalisation \
+Chapter 5 — SQL Queries, Feature by Feature, with Explanations \
+Chapter 6 — User Interface Design and Screenshots \
+Chapter 7 — Work Distribution Table \
 Chapter 8 — Conclusion and Future Work
 
 ---
