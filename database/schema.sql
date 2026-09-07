@@ -1,5 +1,5 @@
 -- ============================================================================
--- Script: EstateNexusDB_Schema.sql
+-- Script: schema.sql (database/schema.sql)
 -- Description: Complete T-SQL Schema script to recreate EstateNexusDB
 --              strictly conforming to the official EstateNexus ER Diagram.
 -- Database Engine: Microsoft SQL Server 2019+

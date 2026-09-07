@@ -15,7 +15,12 @@ namespace EstateNexus
                 {
                     return configConn;
                 }
+<<<<<<< Updated upstream
                 return @"Data Source=localhost;Initial Catalog=EstateNexusDBB;Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
+=======
+
+                return @"Data Source=.;Initial Catalog=EstateNexusDB;Integrated Security=True;Encrypt=False;TrustServerCertificate=True";
+>>>>>>> Stashed changes
             }
         }
 
@@ -728,7 +733,966 @@ namespace EstateNexus
             }
             catch
             {
+<<<<<<< Updated upstream
                 // Fallback silently if database not reachable at startup
+=======
+                // Database will still run if optional seed data fails.
+            }
+        }
+
+        // =====================================================
+        // ENSURE ROLES
+        // =====================================================
+
+        private static void EnsureRoles(SqlConnection connection)
+        {
+            string query = @"
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM Roles
+                    WHERE RoleName = 'Customer'
+                )
+                BEGIN
+                    INSERT INTO Roles
+                    (
+                        RoleName,
+                        RoleDescription
+                    )
+                    VALUES
+                    (
+                        'Customer',
+                        'Can browse properties, request visits, write reviews, and submit complaints.'
+                    );
+                END
+
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM Roles
+                    WHERE RoleName = 'Admin'
+                )
+                BEGIN
+                    INSERT INTO Roles
+                    (
+                        RoleName,
+                        RoleDescription
+                    )
+                    VALUES
+                    (
+                        'Admin',
+                        'Property seller or owner who can list and manage properties.'
+                    );
+                END
+
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM Roles
+                    WHERE RoleName = 'SuperAdmin'
+                )
+                BEGIN
+                    INSERT INTO Roles
+                    (
+                        RoleName,
+                        RoleDescription
+                    )
+                    VALUES
+                    (
+                        'SuperAdmin',
+                        'System administrator with full access.'
+                    );
+                END
+            ";
+
+            using (SqlCommand command =
+                   new SqlCommand(query, connection))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // =====================================================
+        // ENSURE DEFAULT USERS
+        // =====================================================
+
+        private static void EnsureDefaultUsers(SqlConnection connection)
+        {
+            string superAdminHash =
+                PasswordHelper.HashPassword("admin123");
+
+            string adminHash =
+                PasswordHelper.HashPassword("seller123");
+
+            string customerHash =
+                PasswordHelper.HashPassword("customer123");
+
+
+            //--------------------------------------------------
+            // SUPER ADMIN
+            //--------------------------------------------------
+
+            string superAdminQuery = @"
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM Users
+                    WHERE Email = 'admin@estatenexus.com'
+                )
+                BEGIN
+
+                    DECLARE @SuperAdminRoleId INT =
+                    (
+                        SELECT TOP 1 RoleId
+                        FROM Roles
+                        WHERE RoleName = 'SuperAdmin'
+                    );
+
+                    INSERT INTO Users
+                    (
+                        RoleId,
+                        FullName,
+                        Email,
+                        Phone,
+                        PasswordHash,
+                        Address,
+                        ProfileImagePath,
+                        AccountStatus,
+                        IsActive,
+                        CreatedDate
+                    )
+                    VALUES
+                    (
+                        @SuperAdminRoleId,
+                        'Super Admin',
+                        'admin@estatenexus.com',
+                        '01700000000',
+                        @PasswordHash,
+                        'EstateNexus HQ, Kuril, Dhaka',
+                        NULL,
+                        'Active',
+                        1,
+                        GETDATE()
+                    );
+
+                END
+                ELSE
+                BEGIN
+
+                    UPDATE Users
+                    SET PasswordHash = @PasswordHash,
+                        AccountStatus = 'Active',
+                        IsActive = 1
+                    WHERE Email = 'admin@estatenexus.com';
+
+                END
+            ";
+
+            using (SqlCommand command =
+                   new SqlCommand(superAdminQuery, connection))
+            {
+                command.Parameters.AddWithValue(
+                    "@PasswordHash",
+                    superAdminHash);
+
+                command.ExecuteNonQuery();
+            }
+
+
+            //--------------------------------------------------
+            // DEFAULT ADMIN / SELLER
+            //--------------------------------------------------
+
+            string adminQuery = @"
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM Users
+                    WHERE Email = 'seller@estatenexus.com'
+                )
+                BEGIN
+
+                    DECLARE @AdminRoleId INT =
+                    (
+                        SELECT TOP 1 RoleId
+                        FROM Roles
+                        WHERE RoleName = 'Admin'
+                    );
+
+                    INSERT INTO Users
+                    (
+                        RoleId,
+                        FullName,
+                        Email,
+                        Phone,
+                        PasswordHash,
+                        Address,
+                        ProfileImagePath,
+                        AccountStatus,
+                        IsActive,
+                        CreatedDate
+                    )
+                    VALUES
+                    (
+                        @AdminRoleId,
+                        'Property Seller',
+                        'seller@estatenexus.com',
+                        '01711111111',
+                        @PasswordHash,
+                        'Gulshan-2, Dhaka',
+                        NULL,
+                        'Active',
+                        1,
+                        GETDATE()
+                    );
+
+                END
+                ELSE
+                BEGIN
+
+                    UPDATE Users
+                    SET PasswordHash = @PasswordHash,
+                        AccountStatus = 'Active',
+                        IsActive = 1
+                    WHERE Email = 'seller@estatenexus.com';
+
+                END
+            ";
+
+            using (SqlCommand command =
+                   new SqlCommand(adminQuery, connection))
+            {
+                command.Parameters.AddWithValue(
+                    "@PasswordHash",
+                    adminHash);
+
+                command.ExecuteNonQuery();
+            }
+
+
+            //--------------------------------------------------
+            // DEFAULT CUSTOMER
+            //--------------------------------------------------
+
+            string customerQuery = @"
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM Users
+                    WHERE Email = 'customer@estatenexus.com'
+                )
+                BEGIN
+
+                    DECLARE @CustomerRoleId INT =
+                    (
+                        SELECT TOP 1 RoleId
+                        FROM Roles
+                        WHERE RoleName = 'Customer'
+                    );
+
+                    INSERT INTO Users
+                    (
+                        RoleId,
+                        FullName,
+                        Email,
+                        Phone,
+                        PasswordHash,
+                        Address,
+                        ProfileImagePath,
+                        AccountStatus,
+                        IsActive,
+                        CreatedDate
+                    )
+                    VALUES
+                    (
+                        @CustomerRoleId,
+                        'John Customer',
+                        'customer@estatenexus.com',
+                        '01722222222',
+                        @PasswordHash,
+                        'Banani, Dhaka',
+                        NULL,
+                        'Active',
+                        1,
+                        GETDATE()
+                    );
+
+                END
+                ELSE
+                BEGIN
+
+                    UPDATE Users
+                    SET PasswordHash = @PasswordHash,
+                        AccountStatus = 'Active',
+                        IsActive = 1
+                    WHERE Email = 'customer@estatenexus.com';
+
+                END
+            ";
+
+            using (SqlCommand command =
+                   new SqlCommand(customerQuery, connection))
+            {
+                command.Parameters.AddWithValue(
+                    "@PasswordHash",
+                    customerHash);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // =====================================================
+        // ENSURE CATEGORIES
+        // =====================================================
+
+        private static void EnsureCategories(SqlConnection connection)
+        {
+            string query = @"
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM PropertyCategories
+                    WHERE CategoryName = 'Apartment'
+                )
+                BEGIN
+                    INSERT INTO PropertyCategories
+                    (
+                        CategoryName,
+                        Description,
+                        IsActive
+                    )
+                    VALUES
+                    (
+                        'Apartment',
+                        'Residential flats and luxury condominiums',
+                        1
+                    );
+                END
+
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM PropertyCategories
+                    WHERE CategoryName = 'House'
+                )
+                BEGIN
+                    INSERT INTO PropertyCategories
+                    (
+                        CategoryName,
+                        Description,
+                        IsActive
+                    )
+                    VALUES
+                    (
+                        'House',
+                        'Independent houses, villas, and duplex homes',
+                        1
+                    );
+                END
+
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM PropertyCategories
+                    WHERE CategoryName = 'Commercial'
+                )
+                BEGIN
+                    INSERT INTO PropertyCategories
+                    (
+                        CategoryName,
+                        Description,
+                        IsActive
+                    )
+                    VALUES
+                    (
+                        'Commercial',
+                        'Offices, shops, and commercial spaces',
+                        1
+                    );
+                END
+
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM PropertyCategories
+                    WHERE CategoryName = 'Land'
+                )
+                BEGIN
+                    INSERT INTO PropertyCategories
+                    (
+                        CategoryName,
+                        Description,
+                        IsActive
+                    )
+                    VALUES
+                    (
+                        'Land',
+                        'Residential and commercial land',
+                        1
+                    );
+                END
+            ";
+
+            using (SqlCommand command =
+                   new SqlCommand(query, connection))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // =====================================================
+        // ENSURE FEATURES
+        // =====================================================
+
+        private static void EnsureFeatures(SqlConnection connection)
+        {
+            string query = @"
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM PropertyFeatures
+                    WHERE FeatureName = 'Swimming Pool'
+                )
+                BEGIN
+                    INSERT INTO PropertyFeatures
+                    (FeatureName, Description)
+                    VALUES
+                    (
+                        'Swimming Pool',
+                        'Private or shared swimming pool facility'
+                    );
+                END
+
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM PropertyFeatures
+                    WHERE FeatureName = 'Elevator / Lift'
+                )
+                BEGIN
+                    INSERT INTO PropertyFeatures
+                    (FeatureName, Description)
+                    VALUES
+                    (
+                        'Elevator / Lift',
+                        'Passenger elevator facility'
+                    );
+                END
+
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM PropertyFeatures
+                    WHERE FeatureName = 'Car Parking'
+                )
+                BEGIN
+                    INSERT INTO PropertyFeatures
+                    (FeatureName, Description)
+                    VALUES
+                    (
+                        'Car Parking',
+                        'Dedicated parking space'
+                    );
+                END
+
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM PropertyFeatures
+                    WHERE FeatureName = '24/7 Security & CCTV'
+                )
+                BEGIN
+                    INSERT INTO PropertyFeatures
+                    (FeatureName, Description)
+                    VALUES
+                    (
+                        '24/7 Security & CCTV',
+                        'Security and CCTV surveillance'
+                    );
+                END
+
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM PropertyFeatures
+                    WHERE FeatureName = 'Backup Generator'
+                )
+                BEGIN
+                    INSERT INTO PropertyFeatures
+                    (FeatureName, Description)
+                    VALUES
+                    (
+                        'Backup Generator',
+                        'Electricity backup facility'
+                    );
+                END
+
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM PropertyFeatures
+                    WHERE FeatureName = 'Balcony / Terrace'
+                )
+                BEGIN
+                    INSERT INTO PropertyFeatures
+                    (FeatureName, Description)
+                    VALUES
+                    (
+                        'Balcony / Terrace',
+                        'Open balcony or private terrace'
+                    );
+                END
+            ";
+
+            using (SqlCommand command =
+                   new SqlCommand(query, connection))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // =====================================================
+        // ENSURE SAMPLE PROPERTIES
+        // =====================================================
+
+        private static void EnsureProperties(SqlConnection connection)
+        {
+            string query = @"
+
+                IF NOT EXISTS
+                (
+                    SELECT 1
+                    FROM Properties
+                )
+                BEGIN
+
+                    DECLARE @SellerId INT =
+                    (
+                        SELECT TOP 1 UserId
+                        FROM Users
+                        WHERE RoleId =
+                        (
+                            SELECT TOP 1 RoleId
+                            FROM Roles
+                            WHERE RoleName = 'Admin'
+                        )
+                    );
+
+                    DECLARE @ApartmentId INT =
+                    (
+                        SELECT TOP 1 CategoryId
+                        FROM PropertyCategories
+                        WHERE CategoryName = 'Apartment'
+                    );
+
+                    DECLARE @HouseId INT =
+                    (
+                        SELECT TOP 1 CategoryId
+                        FROM PropertyCategories
+                        WHERE CategoryName = 'House'
+                    );
+
+                    DECLARE @CommercialId INT =
+                    (
+                        SELECT TOP 1 CategoryId
+                        FROM PropertyCategories
+                        WHERE CategoryName = 'Commercial'
+                    );
+
+                    DECLARE @LandId INT =
+                    (
+                        SELECT TOP 1 CategoryId
+                        FROM PropertyCategories
+                        WHERE CategoryName = 'Land'
+                    );
+
+
+                    INSERT INTO Properties
+                    (
+                        OwnerId,
+                        CategoryId,
+                        PropertyTitle,
+                        ListingType,
+                        District,
+                        AreaLocation,
+                        FullAddress,
+                        AreaSize,
+                        AreaUnit,
+                        Bedrooms,
+                        Bathrooms,
+                        Price,
+                        Description,
+                        PropertyStatus,
+                        ApprovalStatus,
+                        IsFeatured,
+                        CreatedDate
+                    )
+                    VALUES
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Luxury 3-BHK Apartment in Gulshan',
+                        'Sale',
+                        'Dhaka',
+                        'Gulshan',
+                        'Road 11, Block D, Gulshan-2, Dhaka',
+                        2200.00,
+                        'sqft',
+                        3,
+                        3,
+                        25000000.00,
+                        'Luxury apartment with lake view and modern facilities.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @HouseId,
+                        'Modern Duplex Villa in Banani',
+                        'Rent',
+                        'Dhaka',
+                        'Banani',
+                        'Road 7, Block F, Banani, Dhaka',
+                        3500.00,
+                        'sqft',
+                        4,
+                        4,
+                        120000.00,
+                        'Modern duplex villa with private garden.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @CommercialId,
+                        'Prime Commercial Office Space',
+                        'Rent',
+                        'Dhaka',
+                        'Dhanmondi',
+                        'Satmasjid Road, Dhanmondi, Dhaka',
+                        1800.00,
+                        'sqft',
+                        0,
+                        2,
+                        85000.00,
+                        'Commercial office suitable for corporate use.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @LandId,
+                        'Residential Plot in Purbachal',
+                        'Sale',
+                        'Dhaka',
+                        'Purbachal',
+                        'Sector 4, Purbachal New Town',
+                        3600.00,
+                        'sqft',
+                        0,
+                        0,
+                        9500000.00,
+                        'Residential land ready for construction.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Cozy 2-BHK Flat in Uttara',
+                        'Rent',
+                        'Dhaka',
+                        'Uttara',
+                        'Sector 3, Road 14, Uttara, Dhaka',
+                        1250.00,
+                        'sqft',
+                        2,
+                        2,
+                        35000.00,
+                        'Bright and airy flat located within walking distance of airport and metro station.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Executive 3-BHK Furnished Apartment in Bashundhara',
+                        'Rent',
+                        'Dhaka',
+                        'Bashundhara R/A',
+                        'Block C, Road 5, Bashundhara R/A, Dhaka',
+                        1850.00,
+                        'sqft',
+                        3,
+                        3,
+                        55000.00,
+                        'Fully furnished 3-bedroom apartment with modern interior, imported fixtures, lake view, and 24/7 security.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Brand New 4-BHK Luxury Flat in Mirpur DOHS',
+                        'Sale',
+                        'Dhaka',
+                        'Mirpur DOHS',
+                        'Avenue 3, Road 8, Mirpur DOHS, Dhaka',
+                        2400.00,
+                        'sqft',
+                        4,
+                        4,
+                        18500000.00,
+                        'Spacious south-facing family apartment in serene and secure cantonment environment with double car parking.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @HouseId,
+                        'Exclusive Triplex Luxury Villa in Baridhara',
+                        'Sale',
+                        'Dhaka',
+                        'Baridhara',
+                        'Road 2, Park Way, Baridhara Diplomatic Zone, Dhaka',
+                        5200.00,
+                        'sqft',
+                        5,
+                        6,
+                        85000000.00,
+                        'Architectural masterpiece triplex villa featuring private indoor heated swimming pool, landscaped lawn, high-tech security, and premium Italian marble finishing.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @HouseId,
+                        'Spacious Colonial Style Duplex House in Dhanmondi',
+                        'Rent',
+                        'Dhaka',
+                        'Dhanmondi',
+                        'Road 9/A, Dhanmondi Residential Area, Dhaka',
+                        4000.00,
+                        'sqft',
+                        4,
+                        5,
+                        175000.00,
+                        'Quiet and elegant duplex home with private driveway, lush green front garden, and rooftop BBQ zone.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @CommercialId,
+                        'Corporate Floor Space in Motijheel Financial Hub',
+                        'Sale',
+                        'Dhaka',
+                        'Motijheel',
+                        'Dilkusha Commercial Area, Motijheel, Dhaka',
+                        3200.00,
+                        'sqft',
+                        0,
+                        4,
+                        42000000.00,
+                        'Prime full corporate commercial floor suitable for multinational bank, financial institution, or corporate headquarters.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @CommercialId,
+                        'Premium Retail Showroom on Gulshan Avenue',
+                        'Rent',
+                        'Dhaka',
+                        'Gulshan',
+                        'Gulshan Avenue, Gulshan-1, Dhaka',
+                        2200.00,
+                        'sqft',
+                        0,
+                        2,
+                        210000.00,
+                        'High-footfall ground floor commercial glass showroom facing main Gulshan Avenue with grand frontage and customer parking.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @LandId,
+                        'South-Facing 5 Katha Residential Plot in Bashundhara',
+                        'Sale',
+                        'Dhaka',
+                        'Bashundhara R/A',
+                        'Plot 340, Road 12, Block I, Bashundhara R/A, Dhaka',
+                        3600.00,
+                        'sqft',
+                        0,
+                        0,
+                        14500000.00,
+                        'Demarcated ready plot with Rajuk approved layout, wide 40ft road frontage, and immediate registration.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @LandId,
+                        'Prime 10 Katha Corner Commercial Plot in Uttara',
+                        'Sale',
+                        'Dhaka',
+                        'Uttara',
+                        'Sector 18, Road 204, Uttara 3rd Phase, Dhaka',
+                        7200.00,
+                        'sqft',
+                        0,
+                        0,
+                        38000000.00,
+                        'Corner commercial plot beside metro rail depot, ideal for commercial complex, private hospital, or international school.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Modern 3-BHK Flat in Peaceful Mohakhali DOHS',
+                        'Rent',
+                        'Dhaka',
+                        'Mohakhali DOHS',
+                        'Road 14, Mohakhali DOHS, Dhaka',
+                        1650.00,
+                        'sqft',
+                        3,
+                        3,
+                        48000.00,
+                        'Bright and cross-ventilated 3-bedroom flat on middle floor, strictly family residential community.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Sea-Breeze Luxury 3-BHK Apartment in Nasirabad',
+                        'Sale',
+                        'Chittagong',
+                        'Nasirabad',
+                        'Nasirabad Housing Society, Road 3, Chittagong',
+                        2050.00,
+                        'sqft',
+                        3,
+                        3,
+                        16000000.00,
+                        'Panoramic hill and city view luxury apartment in premier residential neighborhood of Chittagong.',
+                        'Available',
+                        'Approved',
+                        1,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @HouseId,
+                        'Charming 4-BHK Independent House in Sylhet',
+                        'Rent',
+                        'Sylhet',
+                        'Shahjalal Uposhohor',
+                        'Block D, Main Road, Shahjalal Uposhohor, Sylhet',
+                        2800.00,
+                        'sqft',
+                        4,
+                        4,
+                        40000.00,
+                        'Independent double-storey home with fruit garden, front courtyard, and peaceful environment.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    ),
+
+                    (
+                        @SellerId,
+                        @ApartmentId,
+                        'Affordable 2-BHK Family Flat in Khilgaon',
+                        'Rent',
+                        'Dhaka',
+                        'Khilgaon',
+                        'Taltola City Corporation Road, Khilgaon, Dhaka',
+                        1050.00,
+                        'sqft',
+                        2,
+                        2,
+                        22000.00,
+                        'Budget-friendly family flat close to market, schools, and transit facilities with continuous utility supply.',
+                        'Available',
+                        'Approved',
+                        0,
+                        GETDATE()
+                    );
+
+                END
+            ";
+
+            using (SqlCommand command =
+                   new SqlCommand(query, connection))
+            {
+                command.ExecuteNonQuery();
+>>>>>>> Stashed changes
             }
         }
     }
