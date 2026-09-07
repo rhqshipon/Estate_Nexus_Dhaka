@@ -873,89 +873,94 @@ The LoginForm is the application entry point. It contains two text fields for em
 
 The RegistrationForm collects the user's full name, email, phone, password, confirm password, and role selection. The role dropdown offers Customer and Admin. The form validates each field in sequence and provides specific error messages for each rule: empty fields, invalid email format, phone number format, password length, and password confirmation mismatch. The error messages appear on a label below the form and through the ErrorProvider on the individual fields.
 
-> 📷 *[Screenshot Placeholder: RegistrationForm showing field validation — save image to `docs/screenshots/registration.png`]*
+![RegistrationForm — Field Validation and Role Assignment](docs/screenshots/registration.png)
+*Figure 6.2 — RegistrationForm featuring credential inputs, role selection (Customer/Admin), and field validation with inline ErrorProvider indicators.*
 
 ## 6.3 Customer Dashboard — Browse Properties Tab
 
 The Browse Properties tab is the first screen the customer sees after logging in. The top section contains a keyword search text box and five filter dropdowns: Listing Type, Category, District, Price Range, and Bedrooms. An Apply Filters button and a Reset Filters button sit next to the search box. Below these controls is a data grid showing the matched listings. Each row displays the Property ID, Title, Category, Listing Type, Location, Address, Area Size, Area Unit, Bedrooms, Bathrooms, Price, Status, and Seller. A label below the grid shows a real-time count such as "5 properties found". At the bottom of the tab there are buttons for Add to Cart, Schedule Visit, and a rental months spinner.
 
 ![Customer Dashboard — Browse Properties Tab](docs/screenshots/customer-dashboard.png)
-*Figure 6.2 — Customer Dashboard (Browse Properties) displaying multi-parameter filters (type, category, district, price, bedrooms), live results counter, catalog DataGridView, cart controls, and visit scheduling.*
+*Figure 6.3 — Customer Dashboard (Browse Properties) displaying multi-parameter filters (type, category, district, price, bedrooms), live results counter, catalog DataGridView, cart controls, and visit scheduling.*
 
 ## 6.4 Customer Dashboard — My Cart Tab
 
 The My Cart tab displays a grid of items currently in the customer's cart. Each row shows the CartItemId, PropertyId, Property Title, Listing Type, Rental Months, Unit Price, Offered Price (total), and Location. A label at the bottom shows the running cart total. A payment method dropdown sits above a Checkout button and a Remove button. The payment dropdown includes Cash, Card, Bkash, Nagad, and Bank Transfer.
 
-> 📷 *[Screenshot Placeholder: Customer Dashboard (My Cart tab) with rental property and payment selector — save image to `docs/screenshots/customer-cart.png`]*
+![Customer Dashboard — My Cart Tab](docs/screenshots/customer-cart.png)
+*Figure 6.4 — Customer Dashboard (My Cart tab) displaying selected properties, running subtotal calculation, payment method selector, and checkout trigger.*
 
 ## 6.5 Invoice Form
 
 After a successful checkout, the InvoiceForm opens as a modal dialog. It displays the invoice number, generation date, customer name and email, payment method, transaction ID, and payment status. A line item table below lists each property with the listing type, rental months, unit price, and final amount. A summary section at the bottom shows the SubTotal, any discount, commission amount, and the total paid. A Print Invoice button at the bottom triggers the system print dialog.
 
 ![InvoiceForm — Completed Transaction Dialog](docs/screenshots/invoice.png)
-*Figure 6.3 — InvoiceForm modal displaying order breakdown, line items with BDT pricing, and the 5% platform commission calculation.*
+*Figure 6.5(a) — InvoiceForm modal displaying order breakdown, line items with BDT pricing, and the 5% platform commission calculation.*
 
 ![InvoiceForm — Rendered Document Print Preview](docs/screenshots/invoice1.png)
-*Figure 6.4 — PrintDocument layout generated for physical printing and PDF export, formatted with company branding and summary totals.*
+*Figure 6.5(b) — PrintDocument layout generated for physical printing and PDF export, formatted with company branding and summary totals.*
 
 ## 6.6 Customer Dashboard — My Visits Tab
 
 The My Visits tab shows all visit requests submitted by the customer. Each row displays the visit ID, property title, visit date, visit time, request status, and any customer note. A Cancel Visit button at the bottom allows the customer to cancel requests that are still in Pending status.
 
-> 📷 *[Screenshot Placeholder: Customer Dashboard (My Visits tab) showing visit appointments and status indicators — save image to `docs/screenshots/customer-visits.png`]*
+![Customer Dashboard — My Visits Tab](docs/screenshots/customer-visits.png)
+*Figure 6.6 — Customer Dashboard (My Visits tab) showing visit appointments, schedule details, and status indicators.*
 
 ## 6.7 Admin (Seller) Dashboard — My Properties Tab
 
 The My Properties tab shows a grid of all listings owned by the logged-in seller. A summary label above the grid shows the count of total, available, and sold listings. An Add Property button opens the AddPropertyForm as a blank entry form. An Edit Property button opens the AddPropertyForm pre-filled with the selected listing's data.
 
 ![Admin Dashboard — My Properties Tab](docs/screenshots/admin-dashboard.png)
-*Figure 6.5 — Seller Dashboard (My Properties inventory) showing property listing summary counters, Add/Edit/Delete actions, status toggle, and catalog DataGridView.*
+*Figure 6.7 — Seller Dashboard (My Properties inventory) showing property listing summary counters, Add/Edit/Delete actions, status toggle, and catalog DataGridView.*
 
 ## 6.8 Admin (Seller) Dashboard — Visit Requests Tab
 
 The Visit Requests tab shows all incoming site visit requests from customers for the seller's properties. Pending requests appear at the top. The seller can select a request and click Approve or Reject. A filter dropdown allows the seller to view requests by status.
 
-> 📷 *[Screenshot Placeholder: Seller Dashboard (Visit Requests tab) displaying customer inspection appointments — save image to `docs/screenshots/admin-visits.png`]*
+![Seller Dashboard — Visit Requests Tab](docs/screenshots/admin-visits.png)
+*Figure 6.8 — Seller Dashboard (Visit Requests tab) displaying customer inspection appointments, status filters, and approval/rejection controls.*
 
 ## 6.9 Add Property Form
 
 The AddPropertyForm is used for both creating and editing listings. It contains dropdowns for Category and Listing Type, text inputs for Title, District, Area Location, Full Address, Area Size, Area Unit, Bedrooms, Bathrooms, Price, and a multi-line text area for Description. An image upload button allows the seller to browse their file system and attach an image, with a preview box showing the selected image before saving.
 
-> 📷 *[Screenshot Placeholder: AddPropertyForm dialog with listing specifications and image attachment preview — save image to `docs/screenshots/add-property.png`]*
+![Add Property Form — Listing Specifications](docs/screenshots/add-property.png)
+*Figure 6.9 — AddPropertyForm dialog with listing specifications, pricing inputs, category dropdowns, and image attachment preview.*
 
 ## 6.10 Super Admin Dashboard — Users Tab
 
 The Users tab shows all registered accounts in a data grid. Two filter dropdowns at the top allow filtering by Role and Account Status. A pending approvals badge label near the top shows the count of accounts still in Pending status. Four action buttons: Approve, Reject, Suspend, and Activate. Approve and Reject only work on Pending accounts. Suspend and Activate work on Active and Suspended accounts respectively. All buttons are disabled when the Super Admin's own account is selected.
 
 ![Super Admin Dashboard — Users Governance Tab](docs/screenshots/superadmin-dashboard.png)
-*Figure 6.6 — Super Admin Dashboard (Users tab) showing pending seller registration counter badge, role/status filters, Approve/Reject/Toggle actions, and user governance DataGridView.*
+*Figure 6.10 — Super Admin Dashboard (Users tab) showing pending seller registration counter badge, role/status filters, Approve/Reject/Toggle actions, and user governance DataGridView.*
 
 ---
 
 # Chapter 7 — Work Distribution Table
 
-| Task Area | Member | Contribution |
-|-----------|--------|--------------|
-| Database schema design and normalisation | Member 1 | |
-| DatabaseSetup.cs — Automatic initialization and migration | Member 1 | |
-| LoginForm and RegistrationForm with validation | Member 2 | |
-| SHA-256 password hashing (PasswordHelper.cs) | Member 1 | |
-| Session management (Session.cs) | Member 2 | |
-| CustomerDashboard — Browse and Filter | Member 1 | |
-| CustomerDashboard — Cart and Checkout | Member 1 | |
-| InvoiceForm with PrintDocument support | Member 1 | |
-| CustomerDashboard — Visit Scheduling | Member 1 | |
-| CustomerDashboard — Reviews and Profile | Member 1 | |
-| AdminDashboard — Property management | Member 2 | |
-| AdminDashboard — Visit request management | Member 2 | |
-| AddPropertyForm with image upload | Member 2 | |
-| SuperAdminDashboard — User management | Member 2 | |
-| SuperAdminDashboard — Revenue reporting | Member 2 | |
-| EF Core entity models (Models/Entities/) | Member 2 | |
-| EstateNexusDbContext.cs model configuration | Member 1 | |
-| UI Theme (Theme.cs) | Member 2 | |
-| Testing and bug fixing | Both Members | |
-| Report writing | Both Members | |
+| Task Area | Assigned Member | Focus Category |
+|-----------|-----------------|----------------|
+| Database schema design and normalisation | Member 1 | Database Architecture |
+| DatabaseSetup.cs — Automatic initialization and migration | Member 1 | Database Architecture |
+| LoginForm and RegistrationForm with validation | Member 2 | Security & Authentication |
+| SHA-256 password hashing (PasswordHelper.cs) | Member 1 | Security & Cryptography |
+| Session management (Session.cs) | Member 2 | Session State |
+| CustomerDashboard — Browse and Filter | Member 1 | Customer Experience |
+| CustomerDashboard — Cart and Checkout | Member 1 | Customer Experience |
+| InvoiceForm with PrintDocument support | Member 1 | Customer Experience |
+| CustomerDashboard — Visit Scheduling | Member 1 | Customer Experience |
+| CustomerDashboard — Reviews and Profile | Member 1 | Customer Experience |
+| AdminDashboard — Property management | Member 2 | Seller / Admin Features |
+| AdminDashboard — Visit request management | Member 2 | Seller / Admin Features |
+| AddPropertyForm with image upload | Member 2 | Seller / Admin Features |
+| SuperAdminDashboard — User management | Member 2 | Super Admin Features |
+| SuperAdminDashboard — Revenue reporting | Member 2 | Super Admin Features |
+| EF Core entity models (Models/Entities/) | Member 2 | Data Modeling |
+| EstateNexusDbContext.cs model configuration | Member 1 | Data Layer |
+| UI Theme (Theme.cs) | Member 2 | UI System |
+| Testing and bug fixing | Both Members | Collaborative QA |
+| Report writing | Both Members | Academic Documentation |
 
 ---
 
