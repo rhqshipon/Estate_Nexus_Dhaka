@@ -1041,6 +1041,122 @@ namespace EstateNexus
 
 
                         ------------------------------------------------
+                        -- ENSURE PAYMENT STATUS CONSTRAINT
+                        ------------------------------------------------
+
+                        IF EXISTS
+                        (
+                            SELECT 1
+                            FROM sys.check_constraints
+                            WHERE parent_object_id = OBJECT_ID('Payments')
+                            AND name = 'CHK_Payments_Status'
+                            AND definition NOT LIKE '%Completed%'
+                        )
+                        BEGIN
+                            ALTER TABLE Payments DROP CONSTRAINT CHK_Payments_Status;
+                            ALTER TABLE Payments WITH CHECK ADD CONSTRAINT CHK_Payments_Status
+                            CHECK (PaymentStatus IN ('Pending', 'Completed', 'Paid', 'Failed', 'Refunded'));
+                        END
+
+
+                        ------------------------------------------------
+                        -- ENSURE PROPERTIES STATUS CONSTRAINT
+                        ------------------------------------------------
+
+                        IF EXISTS
+                        (
+                            SELECT 1
+                            FROM sys.check_constraints
+                            WHERE parent_object_id = OBJECT_ID('Properties')
+                            AND name = 'CHK_Properties_Status'
+                            AND definition NOT LIKE '%Rented%'
+                        )
+                        BEGIN
+                            ALTER TABLE Properties DROP CONSTRAINT CHK_Properties_Status;
+                            ALTER TABLE Properties WITH CHECK ADD CONSTRAINT CHK_Properties_Status
+                            CHECK (PropertyStatus IN ('Available', 'Reserved', 'Booked', 'Sold', 'Rented', 'Inactive'));
+                        END
+
+
+                        ------------------------------------------------
+                        -- ENSURE REVIEWS STATUS CONSTRAINT
+                        ------------------------------------------------
+
+                        IF EXISTS
+                        (
+                            SELECT 1
+                            FROM sys.check_constraints
+                            WHERE parent_object_id = OBJECT_ID('Reviews')
+                            AND name = 'CHK_Reviews_Status'
+                            AND definition NOT LIKE '%Approved%'
+                        )
+                        BEGIN
+                            ALTER TABLE Reviews DROP CONSTRAINT CHK_Reviews_Status;
+                            ALTER TABLE Reviews WITH CHECK ADD CONSTRAINT CHK_Reviews_Status
+                            CHECK (ReviewStatus IN ('Pending', 'Approved', 'Rejected', 'Visible', 'Hidden', 'Deleted'));
+                        END
+
+
+                        ------------------------------------------------
+                        -- ENSURE CARTITEMS COLUMNS
+                        ------------------------------------------------
+
+                        IF NOT EXISTS
+                        (
+                            SELECT 1
+                            FROM INFORMATION_SCHEMA.COLUMNS
+                            WHERE TABLE_NAME = 'CartItems'
+                            AND COLUMN_NAME = 'RentalMonths'
+                        )
+                        BEGIN
+                            ALTER TABLE CartItems
+                            ADD RentalMonths INT NOT NULL DEFAULT 1;
+                        END
+
+                        IF NOT EXISTS
+                        (
+                            SELECT 1
+                            FROM INFORMATION_SCHEMA.COLUMNS
+                            WHERE TABLE_NAME = 'CartItems'
+                            AND COLUMN_NAME = 'OfferedPrice'
+                        )
+                        BEGIN
+                            ALTER TABLE CartItems
+                            ADD OfferedPrice DECIMAL(18,2) NULL;
+                        END
+
+                        IF NOT EXISTS
+                        (
+                            SELECT 1
+                            FROM INFORMATION_SCHEMA.COLUMNS
+                            WHERE TABLE_NAME = 'CartItems'
+                            AND COLUMN_NAME = 'AddedDate'
+                        )
+                        BEGIN
+                            ALTER TABLE CartItems
+                            ADD AddedDate DATETIME NOT NULL DEFAULT GETDATE();
+                        END
+
+
+                        ------------------------------------------------
+                        -- ENSURE VISIT REQUESTS VISITTIME TYPE
+                        ------------------------------------------------
+
+                        IF EXISTS
+                        (
+                            SELECT 1
+                            FROM INFORMATION_SCHEMA.COLUMNS
+                            WHERE TABLE_NAME = 'VisitRequests'
+                            AND COLUMN_NAME = 'VisitTime'
+                            AND DATA_TYPE = 'time'
+                        )
+                        BEGIN
+                            ALTER TABLE VisitRequests
+                            ALTER COLUMN VisitTime NVARCHAR(20) NULL;
+                        END
+
+
+                        ------------------------------------------------
                         -- ENSURE EXISTING USERS ARE ACTIVE
                         ------------------------------------------------
 

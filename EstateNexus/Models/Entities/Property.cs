@@ -15,8 +15,8 @@ namespace EstateNexus.Models.Entities
         public string FullAddress { get; set; }
         public decimal AreaSize { get; set; }
         public string AreaUnit { get; set; } = "sqft";
-        public int Bedrooms { get; set; } = 0;
-        public int Bathrooms { get; set; } = 0;
+        public int? Bedrooms { get; set; } = 0;
+        public int? Bathrooms { get; set; } = 0;
         public decimal Price { get; set; }
         public string Description { get; set; }
         public string PropertyStatus { get; set; } = "Available";
